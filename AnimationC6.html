@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cắt và ghép lục giác thành lăng trụ - thể tích lớn nhất</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--panel:#fff;--line:#ece8f7;--text:#1e1b3a;--muted:#64607d;--accent:#7c3aed;--sa1:#7c3aed;--sa2:#ec4899;--mono:"JetBrains Mono",Consolas,Menlo,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:linear-gradient(135deg,#f3eeff,#e8f8ff 50%,#fff1f7);color:var(--text);font-family:"Be Vietnam Pro",system-ui,sans-serif;overflow:hidden}
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#deck{width:1280px;height:720px;position:relative;transform-origin:center;flex:none}
+.slide{position:absolute;inset:0;padding:28px 44px 40px;border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(124,58,237,.14);background:var(--bg);opacity:0;transform:translateX(60px) scale(.98);pointer-events:none;transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
+.slide.past{transform:translateX(-60px) scale(.98)}
+.slide.active{opacity:1;transform:none;pointer-events:auto}
+.slide.active .in{animation:rise .6s both}
+.slide.active .in:nth-child(2){animation-delay:.08s}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.slide::after{content:"";position:absolute;left:0;top:0;width:8px;height:100%;background:linear-gradient(180deg,var(--sa1),var(--sa2))}
+.hdr{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.qn{font-weight:800;font-size:17px;letter-spacing:.06em;color:#fff;background:linear-gradient(135deg,var(--sa1),var(--sa2));box-shadow:0 6px 16px -6px var(--sa1);padding:6px 16px;border-radius:999px;white-space:nowrap}
+h1{font-size:60px;line-height:1.1;font-weight:800}
+h2{font-size:36px;line-height:1.2;font-weight:800}
+h3{font-size:21px;font-weight:700;margin-bottom:6px;color:var(--accent)}
+p,li{font-size:20px;line-height:1.45}
+ul{list-style:none}
+ul li{position:relative;padding-left:24px;margin:5px 0}
+ul li::before{content:"";position:absolute;left:4px;top:.6em;width:9px;height:9px;border-radius:3px;background:linear-gradient(135deg,var(--sa1),var(--sa2))}
+.muted{color:var(--muted)}
+.grad{background:linear-gradient(90deg,#7c3aed,#ec4899 55%,#f97316);-webkit-background-clip:text;background-clip:text;color:transparent}
+code.i{font-family:var(--mono);font-size:.88em;background:#fdf0f7;border:1px solid #f9d3e6;padding:0 6px;border-radius:6px;color:#be185d}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px;box-shadow:0 8px 24px -12px rgba(124,58,237,.25);border-top:5px solid #7c3aed;margin-bottom:10px}
+.card p{font-size:17px}
+.fig{background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px}
+.fig svg{width:100%;height:auto;display:block}
+.lbl{font-family:var(--mono);font-size:17px;font-weight:700;fill:#1e1b3a}
+.lbl.r{fill:#db2777}
+.lbl.g{fill:#7c3aed}
+.code{font-family:var(--mono);font-size:17px;line-height:1.5;background:#fcfbff;border:1px solid var(--line);border-radius:12px;padding:8px 0;overflow:hidden}
+.code .ln{padding:2px 14px 2px 8px;white-space:pre-wrap;display:flex;transition:background .4s,box-shadow .4s}
+.code .no{color:#c9c3e0;width:26px;flex:none;text-align:right;margin-right:12px;user-select:none}
+.code .ln.cur{background:rgba(245,158,11,.2);box-shadow:inset 5px 0 #f59e0b}
+.code-title{font-family:var(--mono);font-size:14px;color:var(--muted);margin:0 0 5px 4px;font-weight:600}
+.f{opacity:0;transform:translateY(12px);transition:opacity .6s ease,transform .6s ease}
+.f.on{opacity:1;transform:none}
+.ov{opacity:0;transition:opacity .7s ease}
+.ov.on{opacity:1}
+.draw{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 3s ease}
+.draw.on{stroke-dashoffset:0}
+.vars{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.var{display:flex;align-items:center;gap:8px}
+.vn{font-family:var(--mono);font-size:19px;color:var(--accent);font-weight:600}
+.vb{display:inline-flex;align-items:center;justify-content:center;min-width:64px;height:44px;padding:0 10px;border-radius:10px;background:#fff;border:2px solid #c4b5fd;font-family:var(--mono);font-size:18px;font-weight:700}
+.say{margin-top:10px;padding:10px 16px;border-radius:12px;background:linear-gradient(135deg,#1e1b3a,#2a1f4d);color:#fff;font-size:18px;line-height:1.4;min-height:56px}
+.say::before{content:"▶ ";color:#fbbf24}
+.pop{animation:pop .45s}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.25)}100%{transform:none;opacity:1}}
+.title-wrap{height:100%;display:flex;align-items:center;gap:30px}
+.kicker{font-family:var(--mono);color:#db2777;font-size:21px;margin-bottom:16px;font-weight:600}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.45;animation:float 9s ease-in-out infinite}
+@keyframes float{50%{transform:translate(30px,-25px)}}
+.result{font-family:var(--mono);font-size:22px;font-weight:800;padding:10px 16px;border-radius:12px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;display:inline-block}
+#bar{position:fixed;left:0;bottom:0;height:5px;background:linear-gradient(90deg,#7c3aed,#ec4899,#f97316);transition:width .4s;z-index:5}
+#nav{position:fixed;right:16px;bottom:12px;display:flex;gap:8px;align-items:center;z-index:5;font-family:var(--mono);font-size:14px;color:var(--muted)}
+#nav button{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:8px;width:36px;height:32px;cursor:pointer;font-size:16px}
+#hint{position:fixed;left:16px;bottom:12px;font-size:13px;color:#8a91b4;z-index:5}
+@media (max-width:700px){#hint{display:none}}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="deck">
+
+<!-- ===================== TITLE ===================== -->
+<section class="slide" id="title">
+  <div class="orb" style="width:360px;height:360px;background:#f9a8d4;right:-80px;top:-100px"></div>
+  <div class="orb" style="width:280px;height:280px;background:#7dd3fc;left:40%;bottom:-120px;animation-delay:-4s"></div>
+  <div class="title-wrap">
+    <div style="flex:1">
+      <div class="kicker in">// Toán · Ứng dụng đạo hàm · Thể tích lăng trụ</div>
+      <h1 class="in">Cắt và ghép lục giác<br><span class="grad">thành lăng trụ</span></h1>
+      <p class="in muted" style="margin-top:18px;font-size:22px;max-width:620px">Tìm x để thể tích lăng trụ lớn nhất. Các điểm và độ dài được ký hiệu trực tiếp trên hình.</p>
+      <p class="in" style="margin-top:28px;font-size:17px;color:#8a91b4">← → hoặc Space: chuyển · F: toàn màn hình · A: hiện hết</p>
+    </div>
+    <div class="fig in" style="flex:0 0 380px"><svg id="fig-title" viewBox="0 0 300 260"></svg></div>
+  </div>
+</section>
+
+<!-- ===================== ĐỀ BÀI ===================== -->
+<section class="slide" id="de-bai">
+  <div class="hdr in"><span class="qn">BƯỚC 1</span><h2>Đề bài &amp; cách cắt</h2></div>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr">
+    <div class="fig in"><svg id="fig-debai" viewBox="0 0 600 440"></svg></div>
+    <div class="in">
+      <div class="card"><h3>Đề bài</h3>
+        <ul>
+          <li>Tờ giấy hình lục giác PQ… có cạnh <b>PQ = 90</b> cm.</li>
+          <li>Lấy H, K trên PQ sao cho <b>PH = KQ = x</b>, với 0 &lt; x &lt; 45.</li>
+          <li>Cắt theo các đường nối rồi gấp lại thành lăng trụ có đáy lục giác đều ABCDEF.</li>
+          <li>Tìm x để thể tích lăng trụ lớn nhất.</li>
+        </ul>
+      </div>
+      <div class="card"><h3>Công thức</h3><p><code class="i">V = S<sub>đáy</sub> · h</code></p></div>
+      <div class="say">Nhấn → để chạy từng bước.</div>
+      <i class="f" style="display:none" data-show="d-x" data-say="PH = KQ = x: hai đoạn ở hai đầu cạnh PQ có độ dài x."></i>
+      <i class="f" style="display:none" data-show="d-hk" data-say="Đoạn HK nằm giữa: HK = PQ − PH − KQ = 90 − 2x. Đây là cạnh đáy AB của lăng trụ."></i>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CẮT & GHÉP ===================== -->
+<section class="slide" id="cat-ghep">
+  <div class="hdr in"><span class="qn">BƯỚC 2</span><h2>Cắt và ghép thành lăng trụ</h2></div>
+  <div class="cols" style="grid-template-columns:1.2fr 1fr">
+    <div class="fig in"><svg id="fold" viewBox="0 0 600 420"></svg></div>
+    <div class="in">
+      <div class="card"><h3>Đáy</h3><p>Lục giác đều ABCDEF, cạnh AB = 90 − 2x.</p></div>
+      <div class="card"><h3>Chiều cao</h3><p>h = BK = 2x (chứng minh ở bước 3).</p></div>
+      <div class="card"><h3>Chú thích nét vẽ</h3><p>Nét liền: nhìn thấy trực tiếp. Nét đứt: bị che khuất, không nhìn thấy trực tiếp.</p></div>
+      <div class="say">Nhấn → để chạy từng bước.</div>
+      <i class="f" style="display:none" data-morph="0" data-say="Bước 1: cắt theo các đường nối quanh đáy. Còn lại một lục giác đáy và 6 mặt bên."></i>
+      <i class="f" style="display:none" data-morph="1" data-say="Bước 2: gấp 6 mặt bên lên trên, ghép các mép lại, được lăng trụ có đáy lục giác đều ABCDEF."></i>
+      <i class="f" style="display:none" data-morph="1" data-show="fo-bk" data-say="BK là cạnh bên của lăng trụ, nối đáy ABCDEF với đáy trên. Ta có BK = 2x."></i>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== LỜI GIẢI ===================== -->
+<section class="slide" id="loi-giai">
+  <div class="hdr in"><span class="qn">BƯỚC 3</span><h2>Lời giải từng bước</h2></div>
+  <div class="cols" style="grid-template-columns:1.2fr 1fr">
+    <div class="in">
+      <div class="code-title">Lời giải</div>
+<script type="text/plain" data-code id="sol">
+Đặt KQ = x, với 0 < x < 45
+AB = HK = PQ − PH − KQ = 90 − 2x
+ΔABO đều: S_ABO = (90 − 2x)² · √3/4
+S_đáy = S_ABCDEF = 6·S_ABO = (3√3/2)(90 − 2x)²
+ΔBKQ vuông tại K, có ∠KQB = ∠PQO = 60° (ΔPQO đều)
+cos 60° = KQ/KB = x/KB ⇒ KB = 2x
+V = S_đáy · h = S_ABCDEF · BK
+V = 2x · (3√3/2)(90 − 2x)² = 3√3 · x · (90 − 2x)²
+</script>
+    </div>
+    <div class="in">
+      <div class="fig" style="margin-bottom:10px"><svg id="pr-l" viewBox="0 0 600 400"></svg></div>
+      <div class="vars">
+        <div class="var"><span class="vn">x</span><span class="vb"><span id="v-x" data-v0="?">?</span></span></div>
+        <div class="var"><span class="vn">AB</span><span class="vb"><span id="v-ab" data-v0="?">?</span></span></div>
+        <div class="var"><span class="vn">BK</span><span class="vb"><span id="v-bk" data-v0="?">?</span></span></div>
+      </div>
+      <div class="say">Nhấn → để chạy từng bước.</div>
+      <i class="f" style="display:none" data-hl="sol:1" data-v="v-x:x" data-say="Đặt KQ = x. Điều kiện 0 &lt; x &lt; 45 để AB = 90 − 2x &gt; 0."></i>
+      <i class="f" style="display:none" data-hl="sol:2" data-v="v-ab:90 − 2x" data-show="L-ab" data-say="AB = HK = PQ − PH − KQ = 90 − 2x."></i>
+      <i class="f" style="display:none" data-hl="sol:3" data-show="L-abo" data-say="ΔABO đều (O là tâm đáy), nên S_ABO = (90 − 2x)² · √3/4."></i>
+      <i class="f" style="display:none" data-hl="sol:4" data-show="L-base" data-say="Lục giác đáy gồm 6 tam giác đều bằng ABO: S_đáy = 6·S_ABO = (3√3/2)(90 − 2x)²."></i>
+      <i class="f" style="display:none" data-hl="sol:5" data-say="ΔBKQ vuông tại K có ∠KQB = ∠PQO = 60°, vì ΔPQO đều."></i>
+      <i class="f" style="display:none" data-hl="sol:6" data-v="v-bk:2x" data-show="L-bk" data-say="cos 60° = KQ/KB = x/KB, nên KB = 2x."></i>
+      <i class="f" style="display:none" data-hl="sol:7" data-say="Thể tích bằng diện tích đáy nhân chiều cao BK."></i>
+      <i class="f" style="display:none" data-hl="sol:8" data-say="V = 2x · (3√3/2)(90 − 2x)² = 3√3 · x · (90 − 2x)²."></i>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== KHẢO SÁT ===================== -->
+<section class="slide" id="dao-ham">
+  <div class="hdr in"><span class="qn">BƯỚC 4</span><h2>Khảo sát V(x)</h2></div>
+  <div class="cols" style="grid-template-columns:1fr 1.15fr">
+    <div class="in">
+      <div class="code-title">Đạo hàm và nghiệm</div>
+<script type="text/plain" data-code id="kh">
+V(x) = 3√3 · x · (4x² − 360x + 8100)
+V′(x) = 3√3 (12x² − 720x + 8100)
+V′(x) = 0 ⇔ x² − 60x + 675 = 0
+x = 15 (nhận) hoặc x = 45 (loại vì x &lt; 45)
+</script>
+      <div class="say">Nhấn → để chạy từng bước.</div>
+      <i class="f" style="display:none" data-hl="kh:1" data-say="Khai triển biểu thức thể tích theo x."></i>
+      <i class="f" style="display:none" data-hl="kh:2" data-show="g-curve" data-say="Đạo hàm V′(x) = 3√3(12x² − 720x + 8100). Đường cong V(x) trên hình được vẽ dần lên."></i>
+      <i class="f" style="display:none" data-hl="kh:3" data-show="g-up,g-down" data-say="V′ &gt; 0 trên (0; 15) nên V tăng. V′ &lt; 0 trên (15; 45) nên V giảm."></i>
+      <i class="f" style="display:none" data-hl="kh:4" data-show="g-max,g-vert,g-45" data-say="Cực đại tại x = 15: V(15) = 162000√3 ≈ 280592 cm³. Nghiệm x = 45 bị loại."></i>
+    </div>
+    <div class="fig in"><svg id="graph" viewBox="0 0 600 380"></svg></div>
+  </div>
+</section>
+
+<!-- ===================== KẾT QUẢ ===================== -->
+<section class="slide" id="ket-qua">
+  <div class="hdr in"><span class="qn">BƯỚC 5</span><h2>Kết luận</h2></div>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr">
+    <div class="fig in"><svg id="pr-k" viewBox="0 0 600 400"></svg></div>
+    <div>
+      <div class="f card" data-show="K-ab,K-h" data-say="Với x = 15: AB = 90 − 30 = 60 cm và BK = 2·15 = 30 cm."><h3>Kích thước tại x = 15</h3><p>AB = 60 cm, BK = 30 cm</p></div>
+      <div class="f card" data-say="V(15) = 3√3 · 15 · 60² = 162000√3 cm³."><h3>Thể tích lớn nhất</h3><p style="font-family:var(--mono)">V(15) = 162000√3 cm³</p></div>
+      <div class="f card" data-say="162000√3 ≈ 280592 cm³. Vì 1 dm³ = 1000 cm³ nên 280592 cm³ = 280,592 dm³ ≈ 280,6 dm³."><h3>Đổi đơn vị</h3><p>≈ 280592 cm³ = 280,592 dm³</p></div>
+      <div class="f" data-say="Làm tròn đến đơn vị ta được đáp số."><div class="result">Đáp số: ≈ 281 dm³</div></div>
+      <div class="say">Nhấn → để xem kết quả.</div>
+    </div>
+  </div>
+</section>
+
+</div></div>
+
+<div id="bar"></div>
+<div id="hint">← → / Space: chuyển · Shift+→: qua slide · Home: đầu · F: toàn màn hình · A: hiện hết</div>
+<div id="nav"><button id="prev" aria-label="Trước">‹</button><span id="count">1/1</span><button id="next" aria-label="Sau">›</button></div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const NS="http://www.w3.org/2000/svg";
+  const pts=a=>a.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+  const T=(x,y,s,c="",id="")=>`<text x="${x}" y="${y}" class="lbl ${c}" text-anchor="middle"${id?` id="${id}"`:""}>${s}</text>`;
+  const ang=i=>i*Math.PI/3;
+  const C=[300,190];
+  const PHI=25*Math.PI/180;
+  const VN=[...Array(6)].map((_,i)=>[300+80*Math.cos(ang(i)+PHI),190+80*Math.sin(ang(i)+PHI)]);
+  const DIR=[...Array(6)].map((_,i)=>[60*Math.cos(ang(i)+PHI+Math.PI/6),60*Math.sin(ang(i)+PHI+Math.PI/6)]);
+  const BP=[...Array(6)].map((_,i)=>[300+95*Math.cos(ang(i)+PHI),300+38*Math.sin(ang(i)+PHI)]);
+  const TP=BP.map(p=>[p[0],p[1]-150]);
+  const LN=[...Array(6)].map((_,i)=>[300+102*Math.cos(ang(i)+PHI),190+102*Math.sin(ang(i)+PHI)]);
+  const LP=[...Array(6)].map((_,i)=>[300+112*Math.cos(ang(i)+PHI),300+46*Math.sin(ang(i)+PHI)+4]);
+  const LET="ABCDEF";
+  const DIMN=[395,326], DIMP=[347,352];
+  const O=[300,300];
+
+  // ---- hình tiêu đề: lục giác và tên đỉnh ----
+  $("fig-title").innerHTML=(()=>{
+    const H=[...Array(6)].map((_,i)=>[150+100*Math.cos(ang(i)),130+100*Math.sin(ang(i))]);
+    let s=`<polygon points="${pts(H)}" style="fill:#faf8ff;stroke:#7c3aed;stroke-width:3"/>`;
+    H.forEach((p,i)=>{s+=T(150+130*Math.cos(ang(i)),130+130*Math.sin(ang(i))+6,LET[i],"g")});
+    return s+T(150,140,"O","r");
+  })();
+
+  // ---- hình đề bài: lục giác PQ và các đoạn cắt ----
+  $("fig-debai").innerHTML=(()=>{
+    const P=[180,90],Q=[420,90],H=[220,90],K=[380,90];
+    let s=`<polygon points="180,90 420,90 520,230 420,370 180,370 80,230" style="fill:#faf8ff;stroke:#7c3aed;stroke-width:3"/>`;
+    s+=`<line x1="220" y1="90" x2="220" y2="200" style="stroke:#64607d;stroke-dasharray:6 5;stroke-width:2"/>`;
+    s+=`<line x1="380" y1="90" x2="380" y2="200" style="stroke:#64607d;stroke-dasharray:6 5;stroke-width:2"/>`;
+    s+=`<line x1="220" y1="200" x2="380" y2="200" style="stroke:#64607d;stroke-dasharray:6 5;stroke-width:2"/>`;
+    s+=T(180,72,"P","r")+T(420,72,"Q","r")+T(220,72,"H","r")+T(380,72,"K","r");
+    s+=T(300,62,"PQ = 90 cm","g");
+    s+=`<g class="ov" id="d-x">${T(200,118,"x","r")}${T(400,118,"x","r")}</g>`;
+    s+=`<g class="ov" id="d-hk">${T(300,150,"HK = 90 − 2x","g")}</g>`;
+    return s;
+  })();
+
+  // ---- hình gập: lưới cắt (net) biến dần thành lăng trụ (prism) ----
+  const FACE=[];
+  let foldHTML="";
+  for(let i=0;i<6;i++) foldHTML+=`<polygon id="f${i}" style="fill:#faf8ff"/>`;
+  foldHTML+=`<polygon id="top" style="fill:#ede9fe"/><polygon id="bot" style="fill:#faf8ff"/>`;
+  for(let i=0;i<6;i++) foldHTML+=`<line id="eb${i}" style="stroke:#7c3aed;stroke-width:2.5"/><line id="el${i}" style="stroke:#7c3aed;stroke-width:2.5"/><line id="er${i}" style="stroke:#7c3aed;stroke-width:2.5"/><line id="et${i}" style="stroke:#7c3aed;stroke-width:2.5"/>`;
+  for(let i=0;i<6;i++) foldHTML+=`<text id="la${i}" class="lbl r" text-anchor="middle"></text>`;
+  foldHTML+=`<text id="dim" class="lbl g ov-fixed" text-anchor="middle"></text>`;
+  foldHTML+=`<g class="ov" id="fo-bk"><line x1="${BP[1][0]}" y1="${BP[1][1]}" x2="${TP[1][0]}" y2="${TP[1][1]}" style="stroke:#f59e0b;stroke-width:5"/>${T(TP[1][0]+52,(TP[1][1]+BP[1][1])/2,"BK = 2x","g")}</g>`;
+  $("fold").innerHTML=foldHTML;
+
+  const smooth=e=>e*e*(3-2*e);
+  const L=(a,b,e)=>[a[0]+(b[0]-a[0])*e,a[1]+(b[1]-a[1])*e];
+  function drawFold(e){
+    for(let i=0;i<6;i++){
+      const j=(i+1)%6;
+      const net=[VN[i],VN[j],[VN[j][0]+DIR[i][0],VN[j][1]+DIR[i][1]],[VN[i][0]+DIR[i][0],VN[i][1]+DIR[i][1]]];
+      const pr=[BP[i],BP[j],TP[j],TP[i]];
+      const c=net.map((p,k)=>L(p,pr[k],e));
+      $("f"+i).setAttribute("points",pts(c));
+      const seg=(id,a,b,hid)=>{const el=$(id);el.setAttribute("x1",a[0]);el.setAttribute("y1",a[1]);el.setAttribute("x2",b[0]);el.setAttribute("y2",b[1]);el.setAttribute("stroke-dasharray",hid&&e>0.5?"8 6":"none")};
+      seg("eb"+i,c[0],c[1],i>=3);
+      seg("er"+i,c[1],c[2],j>=4);
+      seg("et"+i,c[2],c[3],false);
+      seg("el"+i,c[3],c[0],i>=4);
+      const lp=L(LN[i],LP[i],e);
+      const t=$("la"+i); t.textContent=LET[i]; t.setAttribute("x",lp[0]); t.setAttribute("y",lp[1]);
+    }
+    $("bot").setAttribute("points",pts(VN.map((v,i)=>L(v,BP[i],e))));
+    $("top").setAttribute("points",pts(TP.map(t=>L(C,t,e))));
+    $("top").style.opacity=e;
+    const d=L([DIMN[0],DIMN[1]],DIMP,e);
+    $("dim").textContent="AB = 90 − 2x"; $("dim").setAttribute("x",d[0]); $("dim").setAttribute("y",d[1]);
+  }
+  let me=0,mt=0,running=false;
+  function tick(){
+    const d=mt-me;
+    if(Math.abs(d)>0.002){me+=d*0.04;drawFold(smooth(me));requestAnimationFrame(tick)}
+    else{me=mt;drawFold(smooth(me));running=false}
+  }
+  function setMorph(t){mt=t;if(!running){running=true;requestAnimationFrame(tick)}}
+  drawFold(0);
+
+  // ---- hình lăng trụ tĩnh có chữ ký hiệu (dùng ở lời giải và kết quả) ----
+  function prismStatic(id,abText,bkText){
+    let s="";
+    for(let i=0;i<6;i++){
+      const j=(i+1)%6;
+      s+=`<polygon points="${pts([BP[i],BP[j],TP[j],TP[i]])}" style="fill:#faf8ff"/>`;
+    }
+    s+=`<polygon points="${pts(TP)}" style="fill:#ede9fe"/>`;
+    s+=`<polygon points="${pts(BP)}" style="fill:#faf8ff"/>`;
+    for(let i=0;i<6;i++){
+      const j=(i+1)%6, ln=(a,b,h)=>`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" style="stroke:#7c3aed;stroke-width:2.5;stroke-dasharray:${h?"8 6":"none"}"/>`;
+      s+=ln(BP[i],BP[j],i>=3)+ln(TP[i],TP[j],false)+ln(BP[i],TP[i],i>=4);
+    }
+    for(let i=0;i<6;i++) s+=T(LP[i][0],LP[i][1],LET[i],"r");
+    s+=`<g class="ov" id="${id}-abo"><polygon points="${pts([O,BP[0],BP[1]])}" style="fill:rgba(245,158,11,.45)"/>${T(O[0]+4,O[1]+6,"O","g")}</g>`;
+    s+=`<g class="ov" id="${id}-base"><polygon points="${pts(BP)}" style="fill:none;stroke:#f59e0b;stroke-width:6"/></g>`;
+    s+=`<g class="ov" id="${id}-ab">${T(DIMP[0],DIMP[1],abText,"g")}</g>`;
+    s+=`<g class="ov" id="${id}-bk"><line x1="${BP[1][0]}" y1="${BP[1][1]}" x2="${TP[1][0]}" y2="${TP[1][1]}" style="stroke:#f59e0b;stroke-width:5"/>${T(TP[1][0]+52,(TP[1][1]+BP[1][1])/2,bkText,"g")}</g>`;
+    return s;
+  }
+  $("pr-l").innerHTML=prismStatic("L","AB = 90 − 2x","BK = 2x");
+  $("pr-k").innerHTML=prismStatic("K","AB = 60 cm","BK = 30 cm");
+  // Lăng trụ ở slide kết quả: đánh dấu các kích thước tại x = 15
+  $("pr-k").innerHTML+=`<g class="ov" id="K-h"><text x="40" y="360" class="lbl r">BK = 30 cm (chiều cao)</text></g><g class="ov" id="K-ab"><text x="40" y="385" class="lbl g">AB = 60 cm (cạnh đáy)</text></g>`;
+
+  // ---- đồ thị V(x) ----
+  const X0=60,SX=10.67,Y0=340,SY=260/(162000*Math.sqrt(3));
+  const Vf=x=>3*Math.sqrt(3)*x*(90-2*x)**2;
+  let path="";
+  for(let x=0;x<=45.001;x+=0.5){
+    const px=X0+x*SX, py=Y0-Vf(x)*SY;
+    path+=(x===0?"M":"L")+px.toFixed(1)+" "+py.toFixed(1)+" ";
+  }
+  $("graph").innerHTML=
+    `<line x1="60" y1="340" x2="580" y2="340" style="stroke:#64607d;stroke-width:2"/>`+
+    `<line x1="60" y1="340" x2="60" y2="40" style="stroke:#64607d;stroke-width:2"/>`+
+    T(590,360,"x","g")+T(30,40,"V(x)","g")+T(60,362,"0")+T(220,362,"15")+T(540,362,"45")+
+    `<path id="g-curve" class="ov draw" pathLength="1" d="${path}" style="fill:none;stroke:#7c3aed;stroke-width:4"/>`+
+    `<g class="ov" id="g-up">${T(120,250,"V′ > 0 ↗","g")}</g>`+
+    `<g class="ov" id="g-down">${T(410,250,"V′ < 0 ↘","r")}</g>`+
+    `<g class="ov" id="g-vert"><line x1="220" y1="80" x2="220" y2="340" style="stroke:#f59e0b;stroke-width:2;stroke-dasharray:6 5"/></g>`+
+    `<g class="ov" id="g-max"><circle cx="220" cy="80" r="7" style="fill:#db2777"/>${T(240,64,"V(15) ≈ 280592 cm³","r")}</g>`+
+    `<g class="ov" id="g-45">${T(520,120,"x = 45 (loại)","r")}</g>`;
+
+  // ---- dựng slide ----
+  const deck=$("deck");
+  const slides=[...document.querySelectorAll(".slide")];
+  let cur=0,step=0;
+  const frags=i=>[...slides[i].querySelectorAll(".f")];
+  function fit(){deck.style.transform=`scale(${Math.min(innerWidth/1280,innerHeight/720)*0.97})`}
+  addEventListener("resize",fit);fit();
+
+  document.querySelectorAll('script[data-code]').forEach(sc=>{
+    const box=document.createElement("div");
+    box.className="code"; box.id=sc.id;
+    sc.textContent.replace(/^\n/,"").replace(/\s+$/,"").split("\n").forEach((t,i)=>{
+      const r=document.createElement("div"); r.className="ln";
+      const n=document.createElement("span"); n.className="no"; n.textContent=i+1;
+      const x=document.createElement("span"); x.textContent=t||" ";
+      r.append(n,x); box.append(r);
+    });
+    sc.replaceWith(box);
+  });
+
+  function parse(f,key,m){(f.dataset[key]||"").split(";").filter(Boolean).forEach(p=>{const j=p.indexOf(":");m[p.slice(0,j)]=p.slice(j+1)})}
+  function applyState(){
+    const s=slides[cur],hl={},vv={},sh=new Set();
+    let morph=0;
+    frags(cur).slice(0,step).forEach(f=>{
+      parse(f,"hl",hl);parse(f,"v",vv);
+      (f.dataset.show||"").split(",").filter(Boolean).forEach(x=>sh.add(x));
+      if(f.dataset.morph!=null) morph=+f.dataset.morph;
+    });
+    s.querySelectorAll(".code").forEach(c=>{
+      const want=new Set();
+      (hl[c.id]||"").split(",").filter(Boolean).forEach(r=>{const [a,b]=r.split("-").map(Number);for(let i=a;i<=(b||a);i++)want.add(i)});
+      [...c.querySelectorAll(".ln")].forEach((l,i)=>l.classList.toggle("cur",want.has(i+1)));
+    });
+    s.querySelectorAll("[data-v0]").forEach(e=>{
+      const nv=vv[e.id]??e.dataset.v0;
+      if(e.textContent!==nv){e.textContent=nv;e.classList.remove("pop");void e.offsetWidth;e.classList.add("pop")}
+    });
+    s.querySelectorAll(".ov").forEach(o=>o.classList.toggle("on",sh.has(o.id)));
+    if(s.id==="cat-ghep") setMorph(morph);
+  }
+  function render(){
+    slides.forEach((s,i)=>{
+      s.classList.toggle("active",i===cur);
+      s.classList.toggle("past",i<cur);
+      frags(i).forEach((f,k)=>f.classList.toggle("on",i===cur&&k<step));
+    });
+    let say=null;
+    frags(cur).slice(0,step).forEach(f=>{if(f.dataset.say)say=f.dataset.say});
+    const sy=slides[cur].querySelector(".say");
+    if(sy) sy.textContent=say||"Nhấn → để chạy từng bước.";
+    $("count").textContent=(cur+1)+"/"+slides.length;
+    $("bar").style.width=((cur+1)/slides.length*100)+"%";
+    applyState();
+    history.replaceState(null,"","#"+slides[cur].id);
+  }
+  function go(i,s=0){cur=Math.max(0,Math.min(slides.length-1,i));step=s;render()}
+  function next(){const n=frags(cur).length;if(step<n)step++;else if(cur<slides.length-1){cur++;step=0}render()}
+  function prev(){if(step>0)step--;else if(cur>0){cur--;step=frags(cur).length}render()}
+  addEventListener("keydown",e=>{
+    if(["ArrowRight","PageDown"," ","Enter"].includes(e.key)){e.preventDefault();e.shiftKey?go(cur+1):next()}
+    else if(["ArrowLeft","PageUp","Backspace"].includes(e.key)){e.preventDefault();e.shiftKey?go(cur-1):prev()}
+    else if(e.key==="Home")go(0);
+    else if(e.key==="End")go(slides.length-1);
+    else if(e.key==="f"||e.key==="F"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()}
+    else if(e.key==="a"||e.key==="A"){step=frags(cur).length;render()}
+  });
+  $("next").onclick=next;
+  $("prev").onclick=prev;
+  document.querySelectorAll("[data-goto]").forEach(el=>el.onclick=()=>go(slides.findIndex(s=>s.id===el.dataset.goto)));
+  let tx=null;
+  addEventListener("touchstart",e=>tx=e.touches[0].clientX,{passive:true});
+  addEventListener("touchend",e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)dx<0?next():prev();tx=null});
+  const idx=slides.findIndex(s=>s.id===location.hash.slice(1));
+  go(idx>=0?idx:0);
+  addEventListener("hashchange",()=>{const j=slides.findIndex(s=>s.id===location.hash.slice(1));if(j>=0&&j!==cur)go(j)});
+})();
+</script>
+</body>
+</html>
