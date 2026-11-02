@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nhập hai phân số rồi ghi ra file</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--line:#ece8f7;--text:#1e1b3a;--muted:#64607d;--accent:#7c3aed;--code:#fcfbff;
+  --k:#d6336c;--t:#7c3aed;--s:#059669;--n:#ea580c;--c:#9ca3b8;--p:#db2777;--fn:#0284c7;--sa1:#7c3aed;--sa2:#ec4899;
+  --mono:"JetBrains Mono","Cascadia Code",Consolas,Menlo,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:linear-gradient(135deg,#f3eeff,#e8f8ff 50%,#fff1f7);color:var(--text);font-family:"Be Vietnam Pro",system-ui,sans-serif;overflow:hidden}
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#deck{width:1280px;height:720px;position:relative;transform-origin:center;flex:none}
+.slide{position:absolute;inset:0;padding:30px 44px 40px;border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(124,58,237,.14);
+  background:radial-gradient(520px 380px at 100% 0%,#ffe1f0 0%,transparent 70%),radial-gradient(600px 420px at 0% 100%,#d9f6ff 0%,transparent 70%),var(--bg);
+  opacity:0;transform:translateX(60px) scale(.98);pointer-events:none;transition:opacity .55s ease,transform .55s cubic-bezier(.2,.8,.2,1)}
+.slide.past{transform:translateX(-60px) scale(.98)}
+.slide.active{opacity:1;transform:none;pointer-events:auto}
+.slide.active .in{animation:rise .6s both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.slide::after{content:"";position:absolute;left:0;top:0;width:8px;height:100%;background:linear-gradient(180deg,var(--sa1),var(--sa2))}
+.hdr{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.qn{font-weight:800;font-size:17px;letter-spacing:.06em;color:#fff;background:linear-gradient(135deg,var(--sa1),var(--sa2));box-shadow:0 6px 16px -6px var(--sa1);padding:6px 16px;border-radius:999px;white-space:nowrap}
+h1{font-size:64px;line-height:1.1;font-weight:800}
+h2{font-size:36px;line-height:1.2;font-weight:800}
+h3{font-size:22px;font-weight:700;margin-bottom:6px;color:var(--accent)}
+p,li{font-size:21px;line-height:1.45}
+.muted{color:var(--muted)}
+ul{list-style:none}
+ul li{position:relative;padding-left:26px;margin:6px 0}
+ul li::before{content:"";position:absolute;left:4px;top:.6em;width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,var(--sa1),var(--sa2))}
+.grad{background:linear-gradient(90deg,#7c3aed,#ec4899 55%,#f97316);-webkit-background-clip:text;background-clip:text;color:transparent}
+code.i{font-family:var(--mono);font-size:.88em;background:#fdf0f7;border:1px solid #f9d3e6;padding:0 6px;border-radius:6px;color:#be185d}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.cols4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 18px;box-shadow:0 8px 24px -12px rgba(124,58,237,.25);border-top:5px solid #7c3aed;margin-bottom:12px}
+.card.bad{border-top-color:#e11d48;background:linear-gradient(180deg,#fff1f3,#fff)}
+.card.good{border-top-color:#10b981;background:linear-gradient(180deg,#ecfdf5,#fff)}
+.card p{font-size:17px}
+.note{margin-top:12px;padding:10px 16px;border-left:5px solid #f59e0b;background:linear-gradient(90deg,#fff7e0,#fffdf6);border-radius:8px;font-size:18px;line-height:1.4}
+.note.blue{border-color:#8b5cf6;background:linear-gradient(90deg,#f3edff,#fbf9ff)}
+.code{font-family:var(--mono);font-size:15px;line-height:1.45;background:var(--code);border:1px solid var(--line);border-radius:12px;padding:10px 0;overflow:hidden}
+.code .ln{padding:0 14px 0 8px;white-space:pre;transition:background .4s,box-shadow .4s;display:flex}
+.code .no{color:#c9c3e0;width:24px;flex:none;text-align:right;margin-right:12px;user-select:none}
+.k{color:var(--k);font-weight:600}.t{color:var(--t);font-weight:600}.s{color:var(--s)}.n{color:var(--n)}.c{color:var(--c);font-style:italic}.p{color:var(--p)}.fn{color:var(--fn)}
+.code .ln.cur{background:rgba(245,158,11,.2);box-shadow:inset 5px 0 #f59e0b}
+.code-title{font-family:var(--mono);font-size:14px;color:var(--muted);margin:0 0 5px 4px;font-weight:600}
+.f{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.f.on{opacity:1;transform:none}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:19px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.35}
+th{background:linear-gradient(90deg,#f1eaff,#e6f8fd);font-weight:700}
+tr:last-child td{border-bottom:none}
+.console{font-family:var(--mono);font-size:18px;line-height:1.5;background:linear-gradient(135deg,#1e1b3a,#2a1f4d);border-radius:12px;padding:10px 16px;color:#e6f0ff;white-space:pre;min-height:60px}
+.console::before{content:"● ● ●";display:block;color:#f472b6;font-size:11px;letter-spacing:3px;margin-bottom:4px}
+.console .ty{color:#fbbf24;font-weight:600}
+.console .f{display:block;transform:none}
+.console .f.il{display:inline}
+.console.file{background:#fff;color:var(--text);border:1px solid var(--line)}
+.console.file::before{display:none}
+.sp{color:#c4b5fd;font-weight:700}
+.vars{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.var{display:flex;align-items:center;gap:10px}
+.vn{font-family:var(--mono);font-size:19px;color:var(--t);font-weight:600}
+.vb{display:inline-flex;align-items:center;justify-content:center;min-width:56px;height:42px;padding:0 10px;border-radius:10px;background:#fff;border:2px solid #c4b5fd;font-family:var(--mono);font-size:20px;font-weight:700}
+.sxs{display:flex;gap:12px;margin-bottom:12px}
+.struct{flex:1;border:2px solid #e4dcfb;border-radius:14px;padding:8px 12px;background:#faf8ff}
+.struct .sname{font-family:var(--mono);font-size:15px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.fld{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.fld .vn{font-size:16px;min-width:88px}
+.say{margin-top:12px;padding:10px 16px;border-radius:12px;background:linear-gradient(135deg,#1e1b3a,#2a1f4d);color:#fff;font-size:18px;line-height:1.4;min-height:62px}
+.say::before{content:"▶ ";color:#fbbf24}
+.pop{animation:pop .45s}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.25)}100%{transform:none;opacity:1}}
+.title-wrap{height:100%;display:flex;flex-direction:column;justify-content:center}
+.kicker{font-family:var(--mono);color:#db2777;font-size:22px;margin-bottom:18px;font-weight:600}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.45;animation:float 9s ease-in-out infinite}
+@keyframes float{50%{transform:translate(30px,-25px)}}
+.agenda{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ag{background:#fff;border:1px solid var(--line);border-left:5px solid #7c3aed;border-radius:12px;padding:13px 14px;cursor:pointer;transition:all .2s;font-size:20px}
+.ag:hover{border-color:#ec4899;transform:translateY(-3px);box-shadow:0 10px 24px -10px rgba(236,72,153,.45)}
+.ag b{color:#db2777;margin-right:6px;font-family:var(--mono)}
+#bar{position:fixed;left:0;bottom:0;height:5px;background:linear-gradient(90deg,#7c3aed,#ec4899,#f97316);transition:width .4s;z-index:5}
+#nav{position:fixed;right:16px;bottom:12px;display:flex;gap:8px;align-items:center;z-index:5;font-family:var(--mono);font-size:14px;color:var(--muted)}
+#nav button{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:8px;width:36px;height:32px;cursor:pointer;font-size:16px}
+#hint{position:fixed;left:16px;bottom:12px;font-size:13px;color:#8a91b4;z-index:5}
+@media (max-width:700px){#hint{display:none}}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="deck">
+
+<!-- ===== TITLE ===== -->
+<section class="slide" id="title">
+  <div class="orb" style="width:380px;height:380px;background:#f9a8d4;right:-60px;top:-80px"></div>
+  <div class="orb" style="width:300px;height:300px;background:#7dd3fc;left:40%;bottom:-120px;animation-delay:-4s"></div>
+  <div class="title-wrap">
+    <div class="kicker in">// C++ · struct · File output · Functions</div>
+    <h1 class="in">Nhập hai phân số<br><span class="grad">rồi ghi ra file</span></h1>
+    <p class="in muted" style="font-size:24px;margin-top:20px;max-width:960px">Chạy từng bước với dữ liệu mẫu 3/4 và 5/6: nhập bằng <code class="i">inputFraction</code>, mở file bằng <code class="i">ofstream</code>, ghi bằng <code class="i">saveFraction</code>, rồi đóng file.</p>
+    <p class="in" style="margin-top:36px;font-size:19px;color:#8a91b4">← → hoặc Space: chuyển · Shift+→: qua slide · F: toàn màn hình · A: hiện hết bước</p>
+  </div>
+</section>
+
+<!-- ===== AGENDA ===== -->
+<section class="slide" id="agenda">
+  <div class="hdr in"><h2>Nội dung</h2><span class="muted" style="font-size:18px">· bấm vào mục để đi tới</span></div>
+  <div class="agenda in">
+    <div class="ag" data-goto="de-bai"><b>01</b>Đề bài &amp; ví dụ</div>
+    <div class="ag" data-goto="phan-tich"><b>02</b>Phân tích: chia thành hàm</div>
+    <div class="ag" data-goto="main1"><b>03</b>main – khai báo &amp; gọi nhập</div>
+    <div class="ag" data-goto="input"><b>04</b>inputFraction – chạy từng bước</div>
+    <div class="ag" data-goto="main2"><b>05</b>main – mở file</div>
+    <div class="ag" data-goto="save"><b>06</b>saveFraction – chạy từng bước</div>
+    <div class="ag" data-goto="ket-thuc"><b>07</b>Đóng file &amp; kết thúc</div>
+    <div class="ag" data-goto="luu-y"><b>08</b>Lưu ý &amp; tóm tắt</div>
+  </div>
+</section>
+
+<!-- ===== ĐỀ BÀI ===== -->
+<section class="slide" id="de-bai">
+  <div class="hdr in"><span class="qn">BƯỚC 1</span><h2>Đề bài &amp; ví dụ</h2></div>
+  <div class="cols">
+    <div>
+      <div class="card in"><h3>Yêu cầu</h3>
+        <ul>
+          <li>Nhập từ bàn phím hai phân số: mỗi phân số có tử số <b>num</b> và mẫu số <b>denom</b>.</li>
+          <li>Ghi ra file <code class="i">D:\2fractions-output.txt</code>, mỗi phân số một dòng, dạng <code class="i">tử mẫu</code>.</li>
+          <li>Nếu không tạo được file thì in <code class="i">Can not create file</code>.</li>
+        </ul>
+      </div>
+      <div class="note f">Kiểu <code class="i">Fraction</code> là một struct gom hai số nguyên <code class="i">num</code> và <code class="i">denom</code> thành một biến.</div>
+    </div>
+    <div>
+      <div class="code-title in">Màn hình khi chạy</div>
+      <div class="console in">Fraction 1: 
+Numerator: <span class="ty">3</span>
+Denominator: <span class="ty">4</span>
+Fraction 2: 
+Numerator: <span class="ty">5</span>
+Denominator: <span class="ty">6</span></div>
+      <div class="code-title in" style="margin-top:12px">File D:\2fractions-output.txt</div>
+      <div class="console file in" style="font-size:22px">3 4
+5 6</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PHÂN TÍCH ===== -->
+<section class="slide" id="phan-tich">
+  <div class="hdr in"><span class="qn">BƯỚC 2</span><h2>Phân tích: chia bài toán thành các hàm</h2></div>
+  <table class="in">
+    <tr><th>Hàm</th><th>Tham số</th><th>Nhiệm vụ</th></tr>
+    <tr><td><code class="i">main</code></td><td>argc, argv (không dùng)</td><td>Khai báo a, b, f; gọi nhập; mở file; gọi ghi; đóng file</td></tr>
+    <tr><td><code class="i">inputFraction</code></td><td><code class="i">Fraction &amp;p</code></td><td>Nhập tử và mẫu từ bàn phím vào p</td></tr>
+    <tr><td><code class="i">saveFraction</code></td><td><code class="i">ofstream &amp;f</code>, <code class="i">Fraction p</code></td><td>Ghi “tử mẫu” rồi xuống dòng vào file</td></tr>
+  </table>
+  <div class="cols4 in" style="grid-template-columns:repeat(3,1fr);margin-top:22px">
+    <div class="card"><h3>Fraction &amp;p</h3><p>Tham chiếu: hàm sửa được biến gốc. Cần thiết khi nhập, vì kết quả phải về a, b của main.</p></div>
+    <div class="card"><h3>Fraction p</h3><p>Giá trị: hàm nhận một bản sao. Đủ dùng khi chỉ cần đọc, như ghi ra file.</p></div>
+    <div class="card"><h3>ofstream &amp;f</h3><p>Luồng file không sao chép được, nên bắt buộc truyền tham chiếu.</p></div>
+  </div>
+</section>
+
+<!-- ===== MAIN 1 ===== -->
+<section class="slide" id="main1">
+  <div class="hdr in"><span class="qn">BƯỚC 3</span><h2><code class="i" style="font-size:32px">main</code> – khai báo &amp; gọi nhập</h2></div>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr">
+    <div class="in">
+      <div class="code-title">main.cpp</div>
+<script type="text/x-cpp" id="cm1">
+int main(int argc, const char * argv[]) {
+    Fraction a, b;
+    ofstream f;
+
+    cout << "Fraction 1: " << endl;
+    inputFraction(a);
+    cout << "Fraction 2: " << endl;
+    inputFraction(b);
+
+    f.open("D:\\2fractions-output.txt");
+    if(!f.is_open()){
+        cout << "Can not create file" << endl;
+    }
+    else{
+        saveFraction(f, a);
+        saveFraction(f, b);
+        f.close();
+    }
+    return 0;
+}
+</script>
+    </div>
+    <div>
+      <div class="vars in">
+        <div class="var"><span class="vn">hàm</span><span class="vb" style="min-width:150px;font-size:18px"><span id="m-fn" data-v0="main">main</span></span></div>
+        <div class="var"><span class="vn">f</span><span class="vb" style="min-width:190px;font-size:16px"><span id="m-f" data-v0="chưa khai báo">chưa khai báo</span></span></div>
+      </div>
+      <div class="sxs in"><div class="sx" data-id="ma" data-name="a" data-title="Fraction a" data-n="?" data-d="?"></div><div class="sx" data-id="mb" data-name="b" data-title="Fraction b" data-n="?" data-d="?"></div></div>
+      <div class="say">Nhấn → để chạy từng bước.</div>
+      <i class="f" style="display:none" data-hl="cm1:2" data-say="Fraction a, b: hai biến kiểu struct. Mỗi biến có hai trường num và denom, chưa gán nên chứa giá trị rác (hiển thị ?)."></i>
+      <i class="f" style="display:none" data-hl="cm1:3" data-v="m-f:đã khai báo, chưa mở" data-say="ofstream f: tạo luồng ghi file. Lúc này f chưa liên kết với file nào."></i>
+      <i class="f" style="display:none" data-hl="cm1:5-8" data-v="m-fn:inputFraction" data-say="main in “Fraction 1: ” rồi gọi inputFraction(a), sau đó in “Fraction 2: ” và gọi inputFraction(b). Cả hai lần đều truyền tham chiếu để ghi thẳng vào a, b. Chi tiết ở slide sau."></i>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INPUT ===== -->
+<section class="slide" id="input">
+  <div class="hdr in"><span class="qn">BƯỚC 4</span><h2><code class="i" style="font-size:32px">inputFraction</code> – chạy từng bước</h2></div>
+  <div class="cols" style="grid-template-columns:1fr 1.05fr">
+    <div class="in">
+      <div class="code-title">main.cpp</div>
+<script type="text/x-cpp" id="ci">
+void inputFraction(Fraction &p){
+    cout << "Numerator: ";
+    cin >> p.num;
+    cout << "Denominator: ";
+    cin >> p.denom;
+}
+</script>
+      <div class="code-title" style="margin-top:12px">Màn hình</div>
+      <div class="console" style="min-height:210px"><span class="f il" data-hl="ci:1" data-v="i-p:a" data-say="main in “Fraction 1: ” rồi gọi inputFraction(a). Fraction &amp;p là tham chiếu: p chính là a (cùng một vùng nhớ), nên p.num là a.num.">Fraction 1: 
+</span><span class="f il" data-hl="ci:2" data-say="cout in lời nhắc “Numerator: ”. Con trỏ nằm cùng dòng, chờ người dùng nhập.">Numerator: </span><span class="f il ty" data-hl="ci:3" data-v="ian:3" data-say="cin &gt;&gt; p.num đọc số 3 người dùng gõ và ghi vào p.num, tức a.num.">3
+</span><span class="f il" data-hl="ci:4" data-say="cout in lời nhắc “Denominator: ”.">Denominator: </span><span class="f il ty" data-hl="ci:5" data-v="iad:4" data-say="cin &gt;&gt; p.denom đọc 4 và ghi vào p.denom, tức a.denom.">4
+</span><i class="f" style="display:none" data-hl="ci:6" data-v="i-p:—" data-say="Hết hàm, quay về main. Lúc này a = 3/4. Vì p là tham chiếu nên không có bản sao nào, dữ liệu nằm sẵn trong a."></i><span class="f il" data-hl="ci:1" data-v="i-p:b" data-say="main in “Fraction 2: ” rồi gọi inputFraction(b). Lần này p là tham chiếu tới b.">Fraction 2: 
+</span><span class="f il" data-hl="ci:2" data-say="Lại in lời nhắc “Numerator: ”.">Numerator: </span><span class="f il ty" data-hl="ci:3" data-v="ibn:5" data-say="cin &gt;&gt; p.num đọc 5 vào p.num, tức b.num.">5
+</span><span class="f il" data-hl="ci:4" data-say="In lời nhắc “Denominator: ”.">Denominator: </span><span class="f il ty" data-hl="ci:5" data-v="ibd:6" data-say="cin &gt;&gt; p.denom đọc 6 vào b.denom.">6
+</span><i class="f" style="display:none" data-hl="ci:6" data-v="i-p:—" data-say="Hết hàm, quay về main. Bây giờ a = 3/4 và b = 5/6."></i></div>
+    </div>
+    <div>
+      <div class="vars in"><div class="var"><span class="vn">p là tham chiếu tới</span><span class="vb" style="min-width:60px"><span id="i-p" data-v0="—">—</span></span></div></div>
+      <div class="sxs in"><div class="sx" data-id="ia" data-name="a" data-title="Fraction a" data-n="?" data-d="?"></div><div class="sx" data-id="ib" data-name="b" data-title="Fraction b" data-n="?" data-d="?"></div></div>
+      <div class="note blue in" style="font-size:17px">Dấu <code class="i">&amp;</code> trong <code class="i">Fraction &amp;p</code> làm p trở thành tên khác của biến truyền vào. Ghi vào p cũng là ghi vào a hoặc b.</div>
+      <div class="say">Nhấn → để chạy từng bước.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MAIN 2 ===== -->
+<section class="slide" id="main2">
+  <div class="hdr in"><span class="qn">BƯỚC 5</span><h2><code class="i" style="font-size:32px">main</code> – mở file</h2></div>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr">
+    <div class="in">
+      <div class="code-title">main.cpp</div>
+<script type="text/x-cpp" id="cm2">
+int main(int argc, const char * argv[]) {
+    Fraction a, b;
+    ofstream f;
+
+    cout << "Fraction 1: " << endl;
+    inputFraction(a);
+    cout << "Fraction 2: " << endl;
+    inputFraction(b);
+
+    f.open("D:\\2fractions-output.txt");
+    if(!f.is_open()){
+        cout << "Can not create file" << endl;
+    }
+    else{
+        saveFraction(f, a);
+        saveFraction(f, b);
+        f.close();
+    }
+    return 0;
+}
+</script>
+    </div>
+    <div>
+      <div class="vars in">
+        <div class="var"><span class="vn">hàm</span><span class="vb" style="min-width:150px;font-size:18px"><span id="m2-fn" data-v0="main">main</span></span></div>
+        <div class="var"><span class="vn">f</span><span class="vb" style="min-width:190px;font-size:16px"><span id="m2-f" data-v0="chưa mở">chưa mở</span></span></div>
+      </div>
+      <div class="sxs in"><div class="sx" data-id="m2a" data-name="a" data-title="Fraction a" data-n="3" data-d="4"></div><div class="sx" data-id="m2b" data-name="b" data-title="Fraction b" data-n="5" data-d="6"></div></div>
+      <div class="code-title in">File D:\2fractions-output.txt</div>
+      <div class="console file in" style="min-height:70px;font-size:17px"><span id="m2-fs" data-v0="(chưa có file)">(chưa có file)</span></div>
+      <div class="say">Nhấn → để chạy từng bước.</div>
+      <i class="f" style="display:none" data-hl="cm2:10" data-v="m2-f:đã mở;m2-fs:(file rỗng, vừa được tạo)" data-say="f.open mở file để ghi. Nếu file chưa có thì được tạo, nếu đã có thì bị ghi đè (xóa nội dung cũ). Giả sử mở thành công."></i>
+      <i class="f" style="display:none" data-hl="cm2:11,14" data-say="is_open() là true nên !is_open() là false: bỏ qua nhánh if (dòng in lỗi) và chạy nhánh else."></i>
+      <i class="f" style="display:none" data-hl="cm2:15-16" data-v="m2-fn:saveFraction" data-say="main gọi saveFraction(f, a) rồi saveFraction(f, b). Bên trong hàm ở slide sau."></i>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SAVE ===== -->
+<section class="slide" id="save">
+  <div class="hdr in"><span class="qn">BƯỚC 6</span><h2><code class="i" style="font-size:32px">saveFraction</code> – chạy từng bước</h2></div>
+  <div class="cols" style="grid-template-columns:1fr 1.05fr">
+    <div class="in">
+      <div class="code-title">main.cpp</div>
+<script type="text/x-cpp" id="cs">
+void saveFraction(ofstream &f, Fraction p){
+    f << p.num << " " << p.denom << endl;
+}
+</script>
+      <div class="code-title" style="margin-top:12px">File D:\2fractions-output.txt <span style="font-weight:400">(· là dấu cách, ↵ là xuống dòng)</span></div>
+      <div class="console file" style="min-height:120px;font-size:24px"><span class="f il" data-hl="cs:1" data-v="sp-src:a;spn:3;spd:4" data-say="saveFraction(f, a): f là tham chiếu tới luồng file của main nên ghi vào đúng file đã mở. p truyền theo giá trị, nên p là BẢN SAO của a: p.num = 3, p.denom = 4."></span><span class="f il" data-hl="cs:2" data-say="f &lt;&lt; p.num ghi số 3 vào file.">3</span><span class="f il" data-hl="cs:2" data-say="&lt;&lt; &quot; &quot; ghi một dấu cách (hiển thị bằng dấu ·) để ngăn cách tử và mẫu."><span class="sp">·</span></span><span class="f il" data-hl="cs:2" data-say="&lt;&lt; p.denom ghi số 4.">4</span><span class="f il" data-hl="cs:2" data-say="&lt;&lt; endl ghi ký tự xuống dòng (↵) và đẩy dữ liệu trong bộ đệm ra file. Dòng 1 của file hoàn chỉnh: 3 4."><span class="sp">↵</span>
+</span><i class="f" style="display:none" data-hl="cs:3" data-v="sp-src:—;spn:–;spd:–" data-say="Hết hàm: bản sao p bị hủy. a trong main không bị ảnh hưởng. Quay về main."></i><span class="f il" data-hl="cs:1" data-v="sp-src:b;spn:5;spd:6" data-say="main gọi saveFraction(f, b): p là bản sao mới của b, p = 5/6. File vẫn đang mở, việc ghi tiếp tục ngay sau dòng 1."></span><span class="f il" data-hl="cs:2" data-say="f &lt;&lt; p.num ghi số 5.">5</span><span class="f il" data-hl="cs:2" data-say="Ghi dấu cách."><span class="sp">·</span></span><span class="f il" data-hl="cs:2" data-say="f &lt;&lt; p.denom ghi số 6.">6</span><span class="f il" data-hl="cs:2" data-say="endl xuống dòng và đẩy dữ liệu ra file. Dòng 2: 5 6. File hoàn chỉnh gồm hai dòng."><span class="sp">↵</span>
+</span><i class="f" style="display:none" data-hl="cs:3" data-v="sp-src:—;spn:–;spd:–" data-say="Hết hàm, bản sao p bị hủy. Quay về main, chuẩn bị đóng file."></i></div>
+    </div>
+    <div>
+      <div class="sxs in"><div class="sx" data-id="sa" data-name="a" data-title="Fraction a (gốc)" data-n="3" data-d="4"></div><div class="sx" data-id="sb" data-name="b" data-title="Fraction b (gốc)" data-n="5" data-d="6"></div></div>
+      <div class="sxs in"><div class="sx" data-id="sp" data-name="p" data-title="Tham số p (bản sao)" data-n="–" data-d="–"></div>
+        <div style="flex:1;display:flex;align-items:center;gap:10px"><span class="vn">p sao từ</span><span class="vb" style="min-width:56px"><span id="sp-src" data-v0="—">—</span></span></div></div>
+      <div class="note blue in" style="font-size:17px">Vì p là bản sao nên sửa p không ảnh hưởng a, b. Còn <code class="i">f</code> là tham chiếu nên cả hai lần gọi cùng ghi vào một file.</div>
+      <div class="say">Nhấn → để chạy từng bước.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== KẾT THÚC ===== -->
+<section class="slide" id="ket-thuc">
+  <div class="hdr in"><span class="qn">BƯỚC 7</span><h2>Đóng file &amp; kết thúc</h2></div>
+  <div class="cols">
+    <div class="in">
+      <div class="code-title">main.cpp (cuối nhánh else)</div>
+<script type="text/x-cpp" id="ck">
+f.close();
+return 0;
+</script>
+      <div class="vars" style="margin-top:14px"><div class="var"><span class="vn">f</span><span class="vb" style="min-width:150px;font-size:17px"><span id="k-f" data-v0="đang mở">đang mở</span></span></div></div>
+      <div class="code-title">File D:\2fractions-output.txt</div>
+      <div class="console file" style="font-size:22px">3<span class="sp">·</span>4<span class="sp">↵</span>
+5<span class="sp">·</span>6<span class="sp">↵</span></div>
+      <div class="say">Nhấn → để chạy từng bước.</div>
+      <i class="f" style="display:none" data-hl="ck:1" data-v="k-f:đã đóng" data-say="f.close() đẩy dữ liệu còn trong bộ đệm xuống đĩa và giải phóng file. Nội dung file như hình."></i>
+      <i class="f" style="display:none" data-hl="ck:2" data-say="return 0 báo chương trình kết thúc thành công."></i>
+    </div>
+    <div class="in">
+      <div class="card good"><h3>Mở file thành công</h3><p>Nhánh else chạy: ghi a, ghi b, đóng file. Màn hình không in thêm gì.</p></div>
+      <div class="card bad"><h3>Không tạo được file</h3><p>is_open() là false: nhánh if in <code class="i">Can not create file</code>, không ghi và không cần đóng.</p></div>
+      <div class="note blue">File này gồm 4 số cách nhau bởi dấu cách và xuống dòng, nên chương trình đọc file bằng <code class="i">&gt;&gt;</code> có thể đọc lại đúng 3, 4, 5, 6.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== LƯU Ý ===== -->
+<section class="slide" id="luu-y">
+  <div class="hdr in"><span class="qn">TỔNG KẾT</span><h2>Lưu ý &amp; tóm tắt</h2></div>
+  <div class="cols4 in">
+    <div class="card bad"><h3>Mẫu số bằng 0</h3><p>Chương trình không kiểm tra denom = 0. Cần kiểm tra khi nhập hoặc tính toán.</p></div>
+    <div class="card bad"><h3>Không kiểm tra cin</h3><p>Nhập chữ thay vì số làm cin lỗi, các lệnh đọc sau đó đều thất bại. Dùng cin.fail().</p></div>
+    <div class="card bad"><h3>Ghi đè file cũ</h3><p>open() xóa nội dung cũ nếu file đã tồn tại. Muốn nối thêm, mở với ios::app.</p></div>
+    <div class="card bad"><h3>Đường dẫn D:</h3><p>Chỉ có trên Windows có ổ D. Ở nơi khác is_open() trả về false.</p></div>
+  </div>
+  <div class="cols4 in" style="margin-top:18px">
+    <div class="card good"><h3>Nhập</h3><p><code class="i">Fraction &amp;p</code>: tham chiếu để ghi về biến gốc.</p></div>
+    <div class="card good"><h3>Mở file</h3><p><code class="i">f.open()</code> rồi kiểm tra <code class="i">is_open()</code>.</p></div>
+    <div class="card good"><h3>Ghi file</h3><p>Ghi “tử mẫu” và <code class="i">endl</code>, một phân số một dòng.</p></div>
+    <div class="card good"><h3>Đóng file</h3><p>Gọi <code class="i">f.close()</code> để dữ liệu xuống đĩa.</p></div>
+  </div>
+</section>
+
+</div></div>
+
+<div id="bar"></div>
+<div id="hint">← → / Space: chuyển · Shift+→: qua slide · Home: đầu · F: toàn màn hình · A: hiện hết</div>
+<div id="nav"><button id="prev" aria-label="Trước">‹</button><span id="count">1/1</span><button id="next" aria-label="Sau">›</button></div>
+
+<script>
+(function(){
+  const KW=new Set("if else for while do return break continue switch case default struct class using namespace const static new delete true false sizeof public private include pragma auto".split(" "));
+  const TY=new Set("int double float char void bool long short unsigned string Fraction ifstream ofstream".split(" "));
+  const LIB=new Set("cout cin endl std".split(" "));
+  const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  function hlLine(line){
+    if(/^\s*#/.test(line)) return '<span class="p">'+esc(line)+'</span>';
+    const re=/(\/\/.*$)|("(?:\\.|[^"\\])*")|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]\w*)\b(\s*\()?/g;
+    let out="",last=0,m;
+    while((m=re.exec(line))){
+      out+=esc(line.slice(last,m.index));
+      if(m[1]) out+='<span class="c">'+esc(m[1])+'</span>';
+      else if(m[2]) out+='<span class="s">'+esc(m[2])+'</span>';
+      else if(m[3]) out+='<span class="n">'+m[3]+'</span>';
+      else if(m[4]){
+        const w=m[4];
+        const cls=KW.has(w)?"k":TY.has(w)?"t":(LIB.has(w)||m[5])?"fn":"";
+        out+=(cls?'<span class="'+cls+'">'+w+'</span>':w)+(m[5]?esc(m[5]):"");
+      }
+      last=re.lastIndex;
+    }
+    return out+esc(line.slice(last));
+  }
+  document.querySelectorAll('script[type="text/x-cpp"]').forEach(sc=>{
+    const lines=sc.textContent.replace(/^\n/,"").replace(/\s+$/,"").split("\n");
+    const div=document.createElement("div");
+    div.className="code "+(sc.className||"");
+    if(sc.id) div.id=sc.id;
+    div.innerHTML=lines.map((l,i)=>'<div class="ln"><span class="no">'+(i+1)+'</span><span>'+(hlLine(l)||" ")+'</span></div>').join("");
+    sc.replaceWith(div);
+  });
+
+  // Hộp struct (num / denom)
+  document.querySelectorAll(".sx").forEach(e=>{
+    const d=e.dataset,id=d.id;
+    e.className+=" struct";
+    e.innerHTML=`<div class="sname">${d.title}</div>`+
+      `<div class="fld"><span class="vn">${d.name}.num</span><span class="vb"><span id="${id}n" data-v0="${d.n}">${d.n}</span></span></div>`+
+      `<div class="fld"><span class="vn">${d.name}.denom</span><span class="vb"><span id="${id}d" data-v0="${d.d}">${d.d}</span></span></div>`;
+  });
+
+  const deck=document.getElementById("deck");
+  const slides=[...document.querySelectorAll(".slide")];
+  let cur=0,step=0;
+  const frags=i=>[...slides[i].querySelectorAll(".f")];
+  function fit(){deck.style.transform=`scale(${Math.min(innerWidth/1280,innerHeight/720)*0.97})`}
+  addEventListener("resize",fit);fit();
+  function parse(f,key,m){(f.dataset[key]||"").split(";").filter(Boolean).forEach(p=>{const j=p.indexOf(":");m[p.slice(0,j)]=p.slice(j+1)})}
+  function applyState(){
+    const s=slides[cur],hl={},vv={};
+    frags(cur).slice(0,step).forEach(f=>{parse(f,"hl",hl);parse(f,"v",vv)});
+    s.querySelectorAll(".code").forEach(c=>{
+      const want=new Set();
+      (hl[c.id]||"").split(",").filter(Boolean).forEach(r=>{const [a,b]=r.split("-").map(Number);for(let i=a;i<=(b||a);i++)want.add(i)});
+      [...c.querySelectorAll(".ln")].forEach((l,i)=>l.classList.toggle("cur",want.has(i+1)));
+    });
+    s.querySelectorAll("[data-v0]").forEach(e=>{
+      const nv=vv[e.id]??e.dataset.v0;
+      if(e.textContent!==nv){e.textContent=nv;e.classList.remove("pop");void e.offsetWidth;e.classList.add("pop")}
+    });
+  }
+  function render(){
+    slides.forEach((s,i)=>{
+      s.classList.toggle("active",i===cur);
+      s.classList.toggle("past",i<cur);
+      frags(i).forEach((f,k)=>f.classList.toggle("on",i===cur&&k<step));
+    });
+    let say=null;
+    frags(cur).slice(0,step).forEach(f=>{if(f.dataset.say)say=f.dataset.say});
+    const sy=slides[cur].querySelector(".say");
+    if(sy) sy.textContent=say||"Nhấn → để chạy từng bước.";
+    document.getElementById("count").textContent=(cur+1)+"/"+slides.length;
+    document.getElementById("bar").style.width=((cur+1)/slides.length*100)+"%";
+    applyState();
+    history.replaceState(null,"","#"+slides[cur].id);
+  }
+  function next(){const n=frags(cur).length;if(step<n)step++;else if(cur<slides.length-1){cur++;step=0}render()}
+  function prev(){if(step>0)step--;else if(cur>0){cur--;step=frags(cur).length}render()}
+  function go(i,s=0){cur=Math.max(0,Math.min(slides.length-1,i));step=s;render()}
+  addEventListener("keydown",e=>{
+    if(["ArrowRight","PageDown"," ","Enter"].includes(e.key)){e.preventDefault();e.shiftKey?go(cur+1):next()}
+    else if(["ArrowLeft","PageUp","Backspace"].includes(e.key)){e.preventDefault();e.shiftKey?go(cur-1):prev()}
+    else if(e.key==="Home")go(0);
+    else if(e.key==="End")go(slides.length-1);
+    else if(e.key==="f"||e.key==="F"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()}
+    else if(e.key==="a"||e.key==="A"){step=frags(cur).length;render()}
+  });
+  document.getElementById("next").onclick=next;
+  document.getElementById("prev").onclick=prev;
+  document.querySelectorAll("[data-goto]").forEach(el=>el.onclick=()=>go(slides.findIndex(s=>s.id===el.dataset.goto)));
+  let tx=null;
+  addEventListener("touchstart",e=>tx=e.touches[0].clientX,{passive:true});
+  addEventListener("touchend",e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)dx<0?next():prev();tx=null});
+  const idx=slides.findIndex(s=>s.id===location.hash.slice(1));
+  go(idx>=0?idx:0);
+  addEventListener("hashchange",()=>{const j=slides.findIndex(s=>s.id===location.hash.slice(1));if(j>=0&&j!==cur)go(j)});
+})();
+</script>
+</body>
+</html>

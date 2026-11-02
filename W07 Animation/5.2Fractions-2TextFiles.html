@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Input fractions and save them to files</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--text:#1e1b3a;--muted:#64607d;--line:#ece8f7;--t:#7c3aed;--k:#d6336c;--s:#059669;--n:#ea580c;--c:#9ca3b8;--p:#db2777;--fn:#0284c7;--mono:"JetBrains Mono",Consolas,Menlo,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:linear-gradient(135deg,#f3eeff,#e8f8ff 50%,#fff1f7);color:var(--text);font-family:"Be Vietnam Pro",system-ui,sans-serif}
+#deck{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center}
+.slide{position:absolute;inset:0;padding:34px 52px 36px 56px;border-radius:16px;background:#fff;box-shadow:0 18px 50px rgba(124,58,237,.14);overflow:hidden;opacity:0;pointer-events:none;transform:translateX(60px);transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1)}
+.slide::before{content:"";position:absolute;left:0;top:0;width:8px;height:100%;background:linear-gradient(180deg,#7c3aed,#ec4899)}
+.slide.past{transform:translateX(-60px)}
+.slide.active{opacity:1;transform:none;pointer-events:auto}
+h1{font-size:60px;line-height:1.1;font-weight:800}
+h2{font-size:34px;line-height:1.2;font-weight:800;margin-bottom:18px}
+h3{font-size:19px;color:#7c3aed;margin-bottom:4px}
+p{font-size:19px;line-height:1.45}
+.muted{color:var(--muted)}
+.grad{background:linear-gradient(90deg,#7c3aed,#ec4899 55%,#f97316);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kicker{font-family:var(--mono);color:#db2777;font-size:20px;margin-bottom:18px;font-weight:600}
+code{font-family:var(--mono);font-size:.9em;background:#fdf0f7;border:1px solid #f9d3e6;padding:0 5px;border-radius:6px;color:#be185d}
+.cols{display:grid;grid-template-columns:1.1fr 1fr;gap:26px;align-items:start}
+.code{font-family:var(--mono);font-size:17px;line-height:1.5;background:#fcfbff;border:1px solid var(--line);border-radius:12px;padding:10px 0;margin-bottom:10px}
+.code .ln{display:flex;padding:0 14px 0 8px;white-space:pre;transition:background .4s,box-shadow .4s}
+.code .no{color:#c9c3e0;width:26px;flex:none;text-align:right;margin-right:12px;user-select:none}
+.code .ln.cur{background:rgba(245,158,11,.2);box-shadow:inset 5px 0 #f59e0b}
+.k{color:var(--k);font-weight:600}.t{color:var(--t);font-weight:600}.s{color:var(--s)}.n{color:var(--n)}.c{color:var(--c);font-style:italic}.p{color:var(--p)}.fn{color:var(--fn)}
+.f{opacity:0;transform:translateY(12px);transition:opacity .45s ease,transform .45s ease}
+.f.on{opacity:1;transform:none}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:10px;box-shadow:0 8px 24px -12px rgba(124,58,237,.25)}
+.card p{font-size:18px}
+.bad{border-left:6px solid #e11d48}
+.cells{display:flex;gap:10px;margin:8px 0 14px}
+.cell{width:74px;height:74px;border-radius:14px;border:3px solid #e4dcfb;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-size:26px;font-weight:800;transition:all .45s}
+.var{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.vn{font-family:var(--mono);font-size:19px;color:var(--t);font-weight:600;width:110px}
+.vb{display:inline-flex;align-items:center;justify-content:center;min-width:120px;height:48px;padding:0 12px;border-radius:10px;border:2px solid #c4b5fd;background:#fff;font-family:var(--mono);font-size:22px;font-weight:700}
+.pop{animation:pop .45s}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.25)}100%{transform:none;opacity:1}}
+.console{font-family:var(--mono);font-size:19px;line-height:1.55;background:linear-gradient(135deg,#1e1b3a,#2a1f4d);border-radius:12px;padding:12px 18px;color:#e6f0ff;white-space:pre;min-height:150px}
+.console .in{color:#fbbf24;font-weight:600}
+.file{font-family:var(--mono);font-size:22px;line-height:1.5;background:#fff;border:2px dashed #c4b5fd;border-radius:12px;padding:10px 16px;white-space:pre;min-height:64px;margin-bottom:10px}
+.res{display:inline-block;font-family:var(--mono);font-size:19px;font-weight:800;padding:6px 16px;border-radius:12px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;margin-top:8px}
+.say{position:absolute;left:56px;right:52px;bottom:30px;padding:10px 16px;border-radius:12px;background:linear-gradient(135deg,#1e1b3a,#2a1f4d);color:#fff;font-size:19px;line-height:1.4;min-height:58px}
+.say::before{content:"▶ ";color:#fbbf24}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#bar{position:fixed;left:0;bottom:0;height:5px;background:linear-gradient(90deg,#7c3aed,#ec4899,#f97316);transition:width .4s;z-index:5}
+#nav{position:fixed;right:14px;bottom:12px;display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:14px;color:var(--muted);z-index:5}
+#nav button{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:8px;width:36px;height:32px;cursor:pointer;font-size:16px}
+#hint{position:fixed;left:14px;bottom:12px;font-size:13px;color:#8a91b4;z-index:5}
+@media print{#nav,#bar,#hint{display:none}}
+</style>
+</head>
+<body>
+<div id="deck">
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide" id="s1">
+  <div class="kicker">// C++ · struct · cin · ofstream · reference parameters</div>
+  <h1>Input two fractions<br><span class="grad">and save each to a file</span></h1>
+  <p class="muted" style="margin-top:22px;max-width:860px">The program reads a fraction from the keyboard, then writes each one to its own text file. We follow it step by step, then look at the mistakes beginners make most often.</p>
+  <div class="say">Press → or Space to step through. Press A to reveal everything.</div>
+</section>
+
+<!-- ============ 2. PLAN ============ -->
+<section class="slide" id="s2">
+  <h2>The struct and the two functions</h2>
+  <div class="cols">
+    <script type="text/x-cpp" id="c2">
+struct Fraction{
+    int num, denom;
+};
+
+void inputFraction(Fraction &amp;p);
+void saveFraction(ofstream &amp;f, Fraction p);
+    </script>
+    <div>
+      <div class="card f" data-hl="c2:5" data-say="inputFraction takes Fraction &p. The &amp; means it works on the caller's variable, so a and b get filled from the keyboard."><h3>inputFraction(Fraction &amp;p)</h3><p>Asks the user for numerator and denominator and stores them in the Fraction it was given.</p></div>
+      <div class="card f" data-hl="c2:6" data-say="saveFraction takes the file stream by reference (&f), because streams cannot be copied. The Fraction p is passed by value: the function only needs to read its numbers."><h3>saveFraction(ofstream &amp;f, Fraction p)</h3><p>Writes one Fraction into an output file as text.</p></div>
+      <div class="card f" data-say="The plan: keyboard into a and b, then a into file 1 and b into file 2."><p><b>Plan:</b> keyboard → <code>a</code>, <code>b</code> → <code>fraction1-output.txt</code>, <code>fraction2-output.txt</code></p></div>
+    </div>
+  </div>
+  <div class="say">Press → to step through.</div>
+</section>
+
+<!-- ============ 3. MAIN: INPUT ============ -->
+<section class="slide" id="s3">
+  <h2>main(): read both fractions from the keyboard</h2>
+  <div class="cols">
+    <script type="text/x-cpp" id="c3">
+int main(int argc, const char * argv[]) {
+    Fraction a, b;
+    ofstream f1, f2;
+
+    cout << "Fraction 1: " << endl;
+    inputFraction(a);
+    cout << "Fraction 2: " << endl;
+    inputFraction(b);
+    </script>
+    <div class="console"><span class="f" data-hl="c3:5" data-say="cout prints the heading Fraction 1: and moves to a new line.">Fraction 1:
+</span><span class="f" data-hl="c3:6" data-say="inputFraction(a) prints Numerator: and waits. The user types 3.">Numerator: <span class="in">3</span>
+</span><span class="f" data-hl="c3:6" data-say="Then Denominator: is printed. The user types 4, so a becomes 3/4.">Denominator: <span class="in">4</span>
+</span><span class="f" data-hl="c3:7" data-say="Next, the heading Fraction 2: is printed.">Fraction 2:
+</span><span class="f" data-hl="c3:8" data-say="inputFraction(b) reads 5 and 6, so b becomes 5/6.">Numerator: <span class="in">5</span>
+Denominator: <span class="in">6</span></span></div>
+  </div>
+  <div class="say">Press → to step through.</div>
+</section>
+
+<!-- ============ 4. inputFraction ============ -->
+<section class="slide" id="s4">
+  <h2>inputFraction: how &amp;p fills a</h2>
+  <div class="cols">
+    <script type="text/x-cpp" id="c4">
+void inputFraction(Fraction &amp;p){
+    cout << "Numerator: ";
+    cin >> p.num;
+    cout << "Denominator: ";
+    cin >> p.denom;
+}
+    </script>
+    <div>
+      <div class="var"><span class="vn">a.num</span><span class="vb"><span id="an" data-v0="?">?</span></span></div>
+      <div class="var"><span class="vn">a.denom</span><span class="vb"><span id="ad" data-v0="?">?</span></span></div>
+      <div class="var"><span class="vn">b.num</span><span class="vb"><span id="bn" data-v0="?">?</span></span></div>
+      <div class="var"><span class="vn">b.denom</span><span class="vb"><span id="bd" data-v0="?">?</span></span></div>
+    </div>
+  </div>
+  <i class="f" data-hl="c4:1" data-say="Called as inputFraction(a), p is another name for a. Anything written to p.num is written to a.num."></i>
+  <i class="f" data-hl="c4:3" data-v="an:3" data-say="cin >> p.num reads the 3 the user typed and stores it in a.num."></i>
+  <i class="f" data-hl="c4:5" data-v="ad:4" data-say="cin >> p.denom reads 4 into a.denom. a is now 3/4."></i>
+  <i class="f" data-v="bn:5;bd:6" data-say="The second call, inputFraction(b), works the same way: b becomes 5/6."></i>
+  <div class="say">Press → to step through.</div>
+</section>
+
+<!-- ============ 5. OPEN & CHECK ============ -->
+<section class="slide" id="s5">
+  <h2>Open both files and check them</h2>
+  <div class="cols">
+    <script type="text/x-cpp" id="c5">
+    f1.open("D:\\fraction1-output.txt");
+    f2.open("D:\\fraction2-output.txt");
+
+    if(!f1.is_open() || !f2.is_open()){
+        cout << "Can not create 2 files" << endl;
+    }
+    </script>
+    <div>
+      <div class="card f" data-hl="c5:1-2" data-say="open() creates each file, or overwrites it if it already exists. The double backslash in the string is one real backslash in the path."><h3>Open</h3><p><code>f1</code> and <code>f2</code> are attached to two output files on D:.</p></div>
+      <div class="card f" data-hl="c5:4" data-say="|| means OR. The error runs if either file failed to open."><h3>Check both</h3><p>The error runs if <b>either</b> file failed. This is the check that matters.</p></div>
+      <div class="card f" data-hl="c5:5" data-say="If a check failed, the program prints the error and writes nothing."><h3>Error path</h3><p>Only the message prints. The else branch, which writes the data, is skipped.</p></div>
+    </div>
+  </div>
+  <div class="say">Press → to step through.</div>
+</section>
+
+<!-- ============ 6. saveFraction ============ -->
+<section class="slide" id="s6">
+  <h2>saveFraction: writing text into the file</h2>
+  <div class="cols">
+    <div>
+      <script type="text/x-cpp" id="c6a">
+    saveFraction(f1, a);
+    saveFraction(f2, b);
+    f1.close();
+    f2.close();
+      </script>
+      <script type="text/x-cpp" id="c6b">
+void saveFraction(ofstream &amp;f, Fraction p){
+    f << p.num << " " << p.denom << endl;
+}
+      </script>
+    </div>
+    <div>
+      <p class="muted" style="font-size:16px">fraction1-output.txt, built one piece at a time:</p>
+      <div class="file"><span class="f" data-hl="c6a:1" data-say="saveFraction(f1, a) copies a into p, so p.num is 3 and p.denom is 4.">  </span><span class="f" data-hl="c6b:2" data-say="f &lt;&lt; p.num writes the text 3 into the file.">3</span><span class="f" data-hl="c6b:2" data-say="The string &quot; &quot; writes a space, so the two numbers stay separate.">␣</span><span class="f" data-hl="c6b:2" data-say="f &lt;&lt; p.denom writes 4.">4</span><span class="f" data-hl="c6b:2" data-say="endl writes a line break, so the next save starts on a new line.">↵</span></div>
+      <p class="muted" style="font-size:16px">fraction2-output.txt, same process for b:</p>
+      <div class="file"><span class="f" data-hl="c6a:2;c6b:2" data-say="saveFraction(f2, b) writes 5, a space, 6 and a line break into the second file.">5␣6↵</span></div>
+      <div class="f" style="margin-top:8px" data-hl="c6a:3-4" data-say="close() flushes the data to disk and releases each file. Without it, the data may not be fully written yet."><span class="res">f1.close(); f2.close();</span></div>
+    </div>
+  </div>
+  <div class="say">Press → to step through.</div>
+</section>
+
+<!-- ============ 7. RESULT ============ -->
+<section class="slide" id="s7">
+  <h2>Result: what the program leaves behind</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr">
+    <div>
+      <p class="muted" style="font-size:16px">D:\fraction1-output.txt</p>
+      <div class="file">3 4</div>
+      <p class="muted" style="font-size:16px">D:\fraction2-output.txt</p>
+      <div class="file">5 6</div>
+    </div>
+    <div>
+      <p class="muted" style="font-size:16px">Console output on success:</p>
+      <div class="console" style="min-height:0">Fraction 1:
+Numerator: 3
+Denominator: 4
+Fraction 2:
+Numerator: 5
+Denominator: 6</div>
+    </div>
+  </div>
+  <p style="margin-top:16px">The program prints nothing extra after saving. The result is just the two files.</p>
+  <div class="say">Next: the mistakes newbies make most often.</div>
+</section>
+
+<!-- ============ 8. COMMON MISTAKES ============ -->
+<section class="slide" id="s8">
+  <h2>Common mistakes newbies make</h2>
+  <div class="grid2">
+    <div class="card bad"><h3>1. Missing &amp; in inputFraction</h3><p>Writing <code>Fraction p</code> changes a copy. a stays unset and the input is lost. Fix: <code>Fraction &amp;p</code>.</p></div>
+    <div class="card bad"><h3>2. Passing ofstream by value</h3><p><code>saveFraction(ofstream f, ...)</code> does not compile, because streams cannot be copied. Fix: <code>ofstream &amp;f</code>.</p></div>
+    <div class="card bad"><h3>3. Single backslash in the path</h3><p><code>"D:\fraction1-output.txt"</code> contains <code>\f</code>, an escape code for form feed, so the name breaks. Fix: <code>"D:\\fraction1-output.txt"</code> or <code>"D:/fraction1-output.txt"</code>.</p></div>
+    <div class="card bad"><h3>4. Wrong check with &amp;&amp;</h3><p><code>!f1.is_open() &amp;&amp; !f2.is_open()</code> only fails when both files fail. Use <code>||</code> so either failure is caught.</p></div>
+    <div class="card bad"><h3>5. Forgetting the space or endl</h3><p><code>f &lt;&lt; p.num &lt;&lt; p.denom</code> writes <code>34</code>, and later reads see one number. Keep the <code>" "</code> between values.</p></div>
+    <div class="card bad"><h3>6. Swapping the files</h3><p>Writing <code>saveFraction(f1, b)</code> puts 5/6 in the file meant for a. Match f1 with a and f2 with b.</p></div>
+  </div>
+  <div class="say">Tip: if an output file is empty or missing, check the path first, then the is_open() result.</div>
+</section>
+
+</div>
+
+<div id="bar"></div>
+<div id="hint">← → / Space: step · Shift+→: next slide · Home/End · F: fullscreen</div>
+<div id="nav"><button id="prev" aria-label="Previous">‹</button><span id="count">1/1</span><button id="next" aria-label="Next">›</button></div>
+
+<script>
+(function(){
+  // ---------- C++ highlighter ----------
+  const KW=new Set("if else for while do return break continue switch case default struct class using namespace const static new delete true false sizeof public private include pragma auto".split(" "));
+  const TY=new Set("int double float char void bool long short unsigned string ifstream ofstream Fraction".split(" "));
+  const LIB=new Set("cout cin endl std".split(" "));
+  const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  function hlLine(line){
+    if(/^\s*#/.test(line)) return '<span class="p">'+esc(line)+'</span>';
+    const re=/(\/\/.*$)|("(?:\\.|[^"\\])*")|\b(\d+)\b|\b([A-Za-z_]\w*)\b(\s*\()?/g;
+    let out="",last=0,m;
+    while((m=re.exec(line))){
+      out+=esc(line.slice(last,m.index));
+      if(m[1]) out+='<span class="c">'+esc(m[1])+'</span>';
+      else if(m[2]) out+='<span class="s">'+esc(m[2])+'</span>';
+      else if(m[3]) out+='<span class="n">'+m[3]+'</span>';
+      else{
+        const w=m[4];
+        const cls=KW.has(w)?"k":TY.has(w)?"t":LIB.has(w)?"fn":(m[5]?"fn":"");
+        out+=(cls?'<span class="'+cls+'">'+w+'</span>':w)+(m[5]?esc(m[5]):"");
+      }
+      last=re.lastIndex;
+    }
+    return out+esc(line.slice(last));
+  }
+  document.querySelectorAll('script[type="text/x-cpp"]').forEach(sc=>{
+    const lines=sc.textContent.replace(/^\n/,"").replace(/\s+$/,"").split("\n");
+    const div=document.createElement("div");
+    div.className="code";
+    div.id=sc.id;
+    div.innerHTML=lines.map((l,i)=>'<div class="ln"><span class="no">'+(i+1)+'</span><span>'+(hlLine(l)||" ")+'</span></div>').join("");
+    sc.replaceWith(div);
+  });
+
+  // ---------- deck engine ----------
+  const deck=document.getElementById("deck");
+  const slides=[...document.querySelectorAll(".slide")];
+  let cur=0,step=0;
+  const frags=i=>[...slides[i].querySelectorAll(".f")];
+  function fit(){const s=Math.min(innerWidth/1280,innerHeight/720)*0.96;deck.style.transform="translate(-50%,-50%) scale("+s+")"}
+  addEventListener("resize",fit);fit();
+  function parse(f,key,m){(f.dataset[key]||"").split(";").filter(Boolean).forEach(p=>{const j=p.indexOf(":");m[p.slice(0,j)]=p.slice(j+1)})}
+  function applyState(){
+    const s=slides[cur],hl={},vv={},cc={};
+    frags(cur).slice(0,step).forEach(f=>{parse(f,"hl",hl);parse(f,"v",vv);parse(f,"c",cc)});
+    s.querySelectorAll(".code").forEach(c=>{
+      const want=new Set();
+      (hl[c.id]||"").split(",").filter(Boolean).forEach(r=>{const [a,b]=r.split("-").map(Number);for(let i=a;i<=(b||a);i++)want.add(i)});
+      c.querySelectorAll(".ln").forEach((l,i)=>l.classList.toggle("cur",want.has(i+1)));
+    });
+    s.querySelectorAll("[data-v0]").forEach(e=>{
+      const nv=vv[e.id]??e.dataset.v0;
+      if(e.textContent!==nv){e.textContent=nv;e.classList.remove("pop");void e.offsetWidth;e.classList.add("pop")}
+    });
+  }
+  function render(){
+    slides.forEach((s,i)=>{
+      s.classList.toggle("active",i===cur);
+      s.classList.toggle("past",i<cur);
+      frags(i).forEach((f,k)=>f.classList.toggle("on",i===cur&&k<step));
+    });
+    const say=frags(cur).slice(0,step).reduce((a,f)=>f.dataset.say||a,null);
+    const sy=slides[cur].querySelector(".say");
+    if(sy) sy.textContent=say||"Press → to step through.";
+    document.getElementById("count").textContent=(cur+1)+"/"+slides.length;
+    document.getElementById("bar").style.width=((cur+1)/slides.length*100)+"%";
+    applyState();
+    try{history.replaceState(null,"","#"+slides[cur].id)}catch(e){}
+  }
+  function next(){if(step<frags(cur).length)step++;else if(cur<slides.length-1){cur++;step=0}render()}
+  function prev(){if(step>0)step--;else if(cur>0){cur--;step=frags(cur).length}render()}
+  function go(i,s=0){cur=Math.max(0,Math.min(slides.length-1,i));step=s;render()}
+  addEventListener("keydown",e=>{
+    if(["ArrowRight","PageDown"," ","Enter"].includes(e.key)){e.preventDefault();e.shiftKey?go(cur+1):next()}
+    else if(["ArrowLeft","PageUp","Backspace"].includes(e.key)){e.preventDefault();e.shiftKey?go(cur-1):prev()}
+    else if(e.key==="Home")go(0);
+    else if(e.key==="End")go(slides.length-1);
+    else if(e.key==="f"||e.key==="F"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()}
+    else if(e.key==="a"||e.key==="A"){step=frags(cur).length;render()}
+  });
+  document.getElementById("next").onclick=next;
+  document.getElementById("prev").onclick=prev;
+  let tx=null;
+  addEventListener("touchstart",e=>tx=e.touches[0].clientX,{passive:true});
+  addEventListener("touchend",e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)dx<0?next():prev();tx=null});
+  const h=location.hash.slice(1);
+  const idx=slides.findIndex(s=>s.id===h);
+  go(idx>=0?idx:0);
+  addEventListener("hashchange",()=>{const j=slides.findIndex(s=>s.id===location.hash.slice(1));if(j>=0&&j!==cur)go(j)});
+})();
+</script>
+</body>
+</html>

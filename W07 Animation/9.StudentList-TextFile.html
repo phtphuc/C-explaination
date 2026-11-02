@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Input and Save a Student List with struct and getline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--line:#ece8f7;--text:#1e1b3a;--muted:#64607d;--accent:#7c3aed;--code:#fcfbff;
+  --k:#d6336c;--t:#7c3aed;--s:#059669;--n:#ea580c;--c:#9ca3b8;--p:#db2777;--fn:#0284c7;--sa1:#7c3aed;--sa2:#ec4899;
+  --mono:"JetBrains Mono","Cascadia Code",Consolas,Menlo,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:linear-gradient(135deg,#f3eeff,#e8f8ff 50%,#fff1f7);color:var(--text);font-family:"Be Vietnam Pro",system-ui,sans-serif;overflow:hidden}
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#deck{width:1280px;height:720px;position:relative;transform-origin:center;flex:none}
+.slide{position:absolute;inset:0;padding:30px 44px 40px;border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(124,58,237,.14);
+  background:radial-gradient(520px 380px at 100% 0%,#ffe1f0 0%,transparent 70%),radial-gradient(600px 420px at 0% 100%,#d9f6ff 0%,transparent 70%),var(--bg);
+  opacity:0;transform:translateX(60px) scale(.98);pointer-events:none;transition:opacity .55s ease,transform .55s cubic-bezier(.2,.8,.2,1)}
+.slide.past{transform:translateX(-60px) scale(.98)}
+.slide.active{opacity:1;transform:none;pointer-events:auto}
+.slide.active .in{animation:rise .6s both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.slide::after{content:"";position:absolute;left:0;top:0;width:8px;height:100%;background:linear-gradient(180deg,var(--sa1),var(--sa2))}
+.hdr{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.qn{font-weight:800;font-size:17px;letter-spacing:.06em;color:#fff;background:linear-gradient(135deg,var(--sa1),var(--sa2));box-shadow:0 6px 16px -6px var(--sa1);padding:6px 16px;border-radius:999px;white-space:nowrap}
+h1{font-size:64px;line-height:1.1;font-weight:800}
+h2{font-size:36px;line-height:1.2;font-weight:800}
+h3{font-size:22px;font-weight:700;margin-bottom:6px;color:var(--accent)}
+p,li{font-size:21px;line-height:1.45}
+.muted{color:var(--muted)}
+ul{list-style:none}
+ul li{position:relative;padding-left:26px;margin:6px 0}
+ul li::before{content:"";position:absolute;left:4px;top:.6em;width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,var(--sa1),var(--sa2))}
+.grad{background:linear-gradient(90deg,#7c3aed,#ec4899 55%,#f97316);-webkit-background-clip:text;background-clip:text;color:transparent}
+code.i{font-family:var(--mono);font-size:.88em;background:#fdf0f7;border:1px solid #f9d3e6;padding:0 6px;border-radius:6px;color:#be185d}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.cols4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 18px;box-shadow:0 8px 24px -12px rgba(124,58,237,.25);border-top:5px solid #7c3aed;margin-bottom:12px}
+.card.bad{border-top-color:#e11d48;background:linear-gradient(180deg,#fff1f3,#fff)}
+.card.good{border-top-color:#10b981;background:linear-gradient(180deg,#ecfdf5,#fff)}
+.card p{font-size:17px}
+.note{margin-top:12px;padding:10px 16px;border-left:5px solid #f59e0b;background:linear-gradient(90deg,#fff7e0,#fffdf6);border-radius:8px;font-size:18px;line-height:1.4}
+.note.blue{border-color:#8b5cf6;background:linear-gradient(90deg,#f3edff,#fbf9ff)}
+.code{font-family:var(--mono);font-size:15px;line-height:1.45;background:var(--code);border:1px solid var(--line);border-radius:12px;padding:10px 0;overflow:hidden}
+.code .ln{padding:0 14px 0 8px;white-space:pre;transition:background .4s,box-shadow .4s;display:flex}
+.code .no{color:#c9c3e0;width:24px;flex:none;text-align:right;margin-right:12px;user-select:none}
+.k{color:var(--k);font-weight:600}.t{color:var(--t);font-weight:600}.s{color:var(--s)}.n{color:var(--n)}.c{color:var(--c);font-style:italic}.p{color:var(--p)}.fn{color:var(--fn)}
+.code .ln.cur{background:rgba(245,158,11,.2);box-shadow:inset 5px 0 #f59e0b}
+.code-title{font-family:var(--mono);font-size:14px;color:var(--muted);margin:0 0 5px 4px;font-weight:600}
+.f{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.f.on{opacity:1;transform:none}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:19px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.35}
+th{background:linear-gradient(90deg,#f1eaff,#e6f8fd);font-weight:700}
+tr:last-child td{border-bottom:none}
+.console{font-family:var(--mono);font-size:18px;line-height:1.5;background:linear-gradient(135deg,#1e1b3a,#2a1f4d);border-radius:12px;padding:10px 16px;color:#e6f0ff;white-space:pre;min-height:60px}
+.console::before{content:"● ● ●";display:block;color:#f472b6;font-size:11px;letter-spacing:3px;margin-bottom:4px}
+.console .ty{color:#fbbf24;font-weight:600}
+.console .f{display:block;transform:none}
+.console .f.il{display:inline}
+.console.file{background:#fff;color:var(--text);border:1px solid var(--line)}
+.console.file::before{display:none}
+.sp{color:#c4b5fd;font-weight:700}
+.vars{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.var{display:flex;align-items:center;gap:10px}
+.vn{font-family:var(--mono);font-size:19px;color:var(--t);font-weight:600}
+.vb{display:inline-flex;align-items:center;justify-content:center;min-width:56px;height:42px;padding:0 10px;border-radius:10px;background:#fff;border:2px solid #c4b5fd;font-family:var(--mono);font-size:20px;font-weight:700}
+.sxs{display:flex;gap:12px;margin-bottom:12px}
+.struct{flex:1;border:2px solid #e4dcfb;border-radius:14px;padding:8px 12px;background:#faf8ff}
+.struct .sname{font-family:var(--mono);font-size:15px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.fld{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.fld .vn{font-size:16px;min-width:88px}
+.say{margin-top:12px;padding:10px 16px;border-radius:12px;background:linear-gradient(135deg,#1e1b3a,#2a1f4d);color:#fff;font-size:18px;line-height:1.4;min-height:62px}
+.say::before{content:"▶ ";color:#fbbf24}
+.pop{animation:pop .45s}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.25)}100%{transform:none;opacity:1}}
+.title-wrap{height:100%;display:flex;flex-direction:column;justify-content:center}
+.kicker{font-family:var(--mono);color:#db2777;font-size:22px;margin-bottom:18px;font-weight:600}
+.orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.45;animation:float 9s ease-in-out infinite}
+@keyframes float{50%{transform:translate(30px,-25px)}}
+.agenda{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ag{background:#fff;border:1px solid var(--line);border-left:5px solid #7c3aed;border-radius:12px;padding:13px 14px;cursor:pointer;transition:all .2s;font-size:20px}
+.ag:hover{border-color:#ec4899;transform:translateY(-3px);box-shadow:0 10px 24px -10px rgba(236,72,153,.45)}
+.ag b{color:#db2777;margin-right:6px;font-family:var(--mono)}
+#bar{position:fixed;left:0;bottom:0;height:5px;background:linear-gradient(90deg,#7c3aed,#ec4899,#f97316);transition:width .4s;z-index:5}
+#nav{position:fixed;right:16px;bottom:12px;display:flex;gap:8px;align-items:center;z-index:5;font-family:var(--mono);font-size:14px;color:var(--muted)}
+#nav button{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:8px;width:36px;height:32px;cursor:pointer;font-size:16px}
+#hint{position:fixed;left:16px;bottom:12px;font-size:13px;color:#8a91b4;z-index:5}
+@media (max-width:700px){#hint{display:none}}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="deck">
+
+<!-- ===== TITLE ===== -->
+<section class="slide" id="title">
+  <div class="orb" style="width:380px;height:380px;background:#f9a8d4;right:-60px;top:-80px"></div>
+  <div class="orb" style="width:300px;height:300px;background:#7dd3fc;left:40%;bottom:-120px;animation-delay:-4s"></div>
+  <div class="title-wrap">
+    <div class="kicker in">// C++ · struct · char arrays · getline</div>
+    <h1 class="in">Input and Save a Student List<br><span class="grad">with struct and getline</span></h1>
+    <p class="in muted" style="font-size:24px;margin-top:20px;max-width:960px">Step-by-step run with 2 students. The key question: why does <code class="i">inputStudent</code> call <code class="i">cin.getline</code> twice for each text field?</p>
+    <p class="in" style="margin-top:36px;font-size:19px;color:#8a91b4">← → or Space: step · Shift+→: next slide · F: fullscreen · A: show everything</p>
+  </div>
+</section>
+
+<!-- ===== AGENDA ===== -->
+<section class="slide" id="agenda">
+  <div class="hdr in"><h2>Contents</h2><span class="muted" style="font-size:18px">· click an item to jump</span></div>
+  <div class="agenda in">
+    <div class="ag" data-goto="de-bai"><b>01</b>Problem &amp; example</div>
+    <div class="ag" data-goto="phan-tich"><b>02</b>Splitting into functions</div>
+    <div class="ag" data-goto="main1"><b>03</b>main – declare &amp; call input</div>
+    <div class="ag" data-goto="input"><b>04</b>inputStudent – the getline trap</div>
+    <div class="ag" data-goto="save"><b>05</b>saveStudent – the file format</div>
+    <div class="ag" data-goto="ket-thuc"><b>06</b>Close the file &amp; finish</div>
+    <div class="ag" data-goto="luu-y"><b>07</b>Notes &amp; summary</div>
+  </div>
+</section>
+
+<!-- ===== PROBLEM ===== -->
+<section class="slide" id="de-bai">
+  <div class="hdr in"><span class="qn">STEP 1</span><h2>Problem &amp; example</h2></div>
+  <div class="cols">
+    <div>
+      <div class="card in"><h3>Requirements</h3>
+        <ul>
+          <li>Read <b>n</b> students. Each has an <b>id</b>, a <b>name</b> (may contain spaces), an <b>age</b> and an <b>address</b>.</li>
+          <li>Save to <code class="i">D:\studentarray-output.txt</code>: first line n, then each student as four lines: id, name, age, address.</li>
+          <li>If the file cannot be created, print <code class="i">Can not create file</code>.</li>
+        </ul>
+      </div>
+      <div class="note f">A name or address can hold up to 100 characters. <code class="i">char name[101]</code> reserves one extra slot for the end-of-string marker <code class="i">'\0'</code>.</div>
+    </div>
+    <div>
+      <div class="code-title in">Screen while running (n = 2)</div>
+      <div class="console in" style="font-size:16px">Students in your class: 
+Number of elements: <span class="ty">2</span>
+a[0]: 
+ID: <span class="ty">1</span>
+Name: <span class="ty">Linh Tran</span>
+Age: <span class="ty">19</span>
+Address: <span class="ty">Da Nang</span>
+a[1]: 
+ID: <span class="ty">2</span>
+Name: <span class="ty">Minh Le</span>
+Age: <span class="ty">20</span>
+Address: <span class="ty">Hue</span></div>
+      <div class="code-title in" style="margin-top:12px">File D:\studentarray-output.txt <span style="font-weight:400">(one field per line)</span></div>
+      <div class="console file in" style="font-size:18px">2
+1
+Linh Tran
+19
+Da Nang
+2
+Minh Le
+20
+Hue</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SPLIT INTO FUNCTIONS ===== -->
+<section class="slide" id="phan-tich">
+  <div class="hdr in"><span class="qn">STEP 2</span><h2>Splitting the problem into functions</h2></div>
+  <table class="in">
+    <tr><th>Function</th><th>Parameters</th><th>Job</th></tr>
+    <tr><td><code class="i">main</code></td><td>argc, argv (unused)</td><td>Declare the array, call input, open the file, call save, close the file</td></tr>
+    <tr><td><code class="i">inputStudent</code></td><td><code class="i">Student &amp;st</code></td><td>Read id, name, age, address into st</td></tr>
+    <tr><td><code class="i">inputStudentArray</code></td><td><code class="i">Student a[]</code>, <code class="i">int &amp;n</code></td><td>Read n, then call inputStudent for each a[i]</td></tr>
+    <tr><td><code class="i">saveStudent</code></td><td><code class="i">ofstream &amp;f</code>, <code class="i">Student st</code></td><td>Write the four fields, one per line</td></tr>
+    <tr><td><code class="i">saveStudentArray</code></td><td><code class="i">ofstream &amp;f</code>, <code class="i">Student a[]</code>, <code class="i">int n</code></td><td>Write n, then call saveStudent for each a[i]</td></tr>
+  </table>
+  <div class="cols4 in" style="grid-template-columns:repeat(3,1fr);margin-top:20px">
+    <div class="card"><h3>Student &amp;st</h3><p>Reference: the fields read are stored directly in the array element passed in.</p></div>
+    <div class="card"><h3>char name[101]</h3><p>A C-string stored in a fixed block. cin.getline reads a whole line, spaces included.</p></div>
+    <div class="card"><h3>Student st (by value)</h3><p>saveStudent gets a copy, including both character arrays. It only reads, so this is safe.</p></div>
+  </div>
+</section>
+
+<!-- ===== MAIN ===== -->
+<section class="slide" id="main1">
+  <div class="hdr in"><span class="qn">STEP 3</span><h2><code class="i" style="font-size:32px">main</code> – declare &amp; call input</h2></div>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr">
+    <div class="in">
+      <div class="code-title">main.cpp</div>
+<script type="text/x-cpp" id="cm">
+int main(int argc, const char * argv[]) {
+    Student a[100];
+    int n = 0;
+    ofstream f;
+
+    cout << "Students in your class: " << endl;
+    inputStudentArray(a, n);
+
+    f.open("D:\\studentarray-output.txt");
+    if(!f.is_open()){
+        cout << "Can not create file" << endl;
+    }
+    else{
+        saveStudentArray(f, a, n);
+        f.close();
+    }
+    return 0;
+}
+</script>
+    </div>
+    <div>
+      <div class="vars in">
+        <div class="var"><span class="vn">function</span><span class="vb" style="min-width:150px;font-size:17px"><span id="m-fn" data-v0="main">main</span></span></div>
+        <div class="var"><span class="vn">n</span><span class="vb"><span id="m-n" data-v0="?">?</span></span></div>
+        <div class="var"><span class="vn">f</span><span class="vb" style="min-width:170px;font-size:15px"><span id="m-f" data-v0="not declared">not declared</span></span></div>
+      </div>
+      <div class="code-title in">Screen</div>
+      <div class="console in" style="min-height:110px;font-size:18px"><span class="f" data-hl="cm:6" data-say="cout prints the heading with endl.">Students in your class: </span><span class="f" data-hl="cm:7" data-v="m-fn:inputStudentArray" data-say="Call inputStudentArray(a, n). Its screen output appears on the next slide.">Number of elements: </span></div>
+      <div class="say">Press → to step through.</div>
+      <i class="f" style="display:none" data-hl="cm:2" data-say="Student a[100]: 100 structs. Each has id, name[101], age and address[101]. None is filled yet."></i>
+      <i class="f" style="display:none" data-hl="cm:3" data-v="m-n:0" data-say="int n = 0: n will be set by the input function."></i>
+      <i class="f" style="display:none" data-hl="cm:4" data-v="m-f:declared, not open" data-say="ofstream f: an output stream, not yet attached to any file."></i>
+      <i class="f" style="display:none" data-hl="cm:9" data-v="m-f:open (file created)" data-say="f.open creates or overwrites D:\studentarray-output.txt. We assume it succeeds."></i>
+      <i class="f" style="display:none" data-hl="cm:10,13" data-say="is_open() is true, so the else branch runs."></i>
+      <i class="f" style="display:none" data-hl="cm:14" data-v="m-fn:saveStudentArray" data-say="Call saveStudentArray(f, a, n). The save slide shows what it writes."></i>
+      <i class="f" style="display:none" data-hl="cm:15" data-v="m-f:closed" data-say="f.close() flushes the data and releases the file."></i>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INPUT ===== -->
+<section class="slide" id="input">
+  <div class="hdr in"><span class="qn">STEP 4</span><h2><code class="i" style="font-size:32px">inputStudent</code> – the getline trap</h2></div>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr">
+    <div class="in">
+      <div class="code-title">main.cpp</div>
+<script type="text/x-cpp" id="ci">
+void inputStudent(Student &st){
+    cout << "ID: ";
+    cin >> st.id;
+    cout << "Name: ";
+    cin.getline(st.name, 101);
+    cin.getline(st.name, 101);
+    cout << "Age: ";
+    cin >> st.age;
+    cout << "Address: ";
+    cin.getline(st.address, 101);
+    cin.getline(st.address, 101);
+}
+</script>
+      <div class="code-title" style="margin-top:12px">Screen</div>
+      <div class="console" style="min-height:190px;font-size:17px"><span class="f" data-hl="ci:2-3" data-v="st-id:1;buf:1↵" data-say="cout prints ID: . cin >> st.id reads 1. The Enter key puts 1 and a newline into the keyboard buffer. cin takes only the 1, so the newline is left behind.">ID: <span class="ty">1</span></span><span class="f il" data-hl="ci:4" data-say="cout prints Name: . The next line, the first getline, does not wait for typing.">Name: </span><i class="f" style="display:none" data-hl="ci:5" data-v="buf:(empty);st-name:(empty)" data-say="The first getline reads the leftover newline and returns an empty string at once. Name is still empty. This is the trap: one getline is not enough."></i><span class="f il ty" data-hl="ci:6" data-v="st-name:Linh Tran;buf:(empty)" data-say="The second getline waits for the real name and reads Linh Tran, including the space.">Linh Tran
+</span><span class="f il" data-hl="ci:7" data-say="cout prints Age: .">Age: </span><span class="f il ty" data-hl="ci:8" data-v="st-age:19;buf:↵ (left over)" data-say="cin &gt;&gt; st.age reads 19 and leaves a newline in the buffer again.">19
+</span><span class="f il" data-hl="ci:9" data-say="cout prints Address: .">Address: </span><i class="f" style="display:none" data-hl="ci:10" data-v="buf:(empty);st-addr:(empty)" data-say="The first getline for address consumes the leftover newline and returns an empty string at once."></i><span class="f il ty" data-hl="ci:11" data-v="st-addr:Da Nang;buf:(empty)" data-say="The second getline reads Da Nang. st now holds all four fields.">Da Nang
+</span><i class="f" style="display:none" data-hl="ci:12" data-say="Return to inputStudentArray, which moves on to the next student."></i></div>
+    </div>
+    <div>
+      <div class="vars in">
+        <div class="var"><span class="vn">st.id</span><span class="vb"><span id="st-id" data-v0="?">?</span></span></div>
+        <div class="var"><span class="vn">st.age</span><span class="vb"><span id="st-age" data-v0="?">?</span></span></div>
+      </div>
+      <div class="vars in">
+        <div class="var"><span class="vn">st.name</span><span class="vb" style="min-width:170px;font-size:17px"><span id="st-name" data-v0="?">?</span></span></div>
+      </div>
+      <div class="vars in">
+        <div class="var"><span class="vn">st.address</span><span class="vb" style="min-width:170px;font-size:17px"><span id="st-addr" data-v0="?">?</span></span></div>
+      </div>
+      <div class="card bad in" style="margin-top:10px"><h3>Keyboard buffer</h3><p style="font-family:var(--mono);font-size:18px">▸ <span id="buf" data-v0="(empty)">(empty)</span></p><p style="font-size:15px">↵ = newline (the Enter key). It is left in the buffer after cin &gt;&gt; and must be consumed before the next text read.</p></div>
+      <div class="note blue in" style="font-size:16px">Fix in practice: call <code class="i">cin.ignore()</code> after each <code class="i">cin &gt;&gt;</code>, then use one <code class="i">getline</code>. The two-getline version here works only when the user presses Enter right after each number.</div>
+      <div class="say">Press → to step through.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SAVE ===== -->
+<section class="slide" id="save">
+  <div class="hdr in"><span class="qn">STEP 5</span><h2><code class="i" style="font-size:32px">saveStudentArray</code> – the file format</h2></div>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr">
+    <div class="in">
+      <div class="code-title">main.cpp</div>
+<script type="text/x-cpp" id="cs">
+void saveStudent(ofstream &f, Student st){
+    f << st.id << endl;
+    f << st.name << endl;
+    f << st.age << endl;
+    f << st.address << endl;
+}
+void saveStudentArray(ofstream &f, Student a[], int n){
+    f << n << endl;
+    for(int i = 0; i < n; i++){
+        saveStudent(f, a[i]);
+    }
+}
+</script>
+      <div class="code-title" style="margin-top:12px">File D:\studentarray-output.txt</div>
+      <div class="console file" style="min-height:170px;font-size:17px">
+<span class="f" data-hl="cs:8" data-v="s-i:–" data-say="f &lt;&lt; n &lt;&lt; endl writes 2 and a newline. The first line of the file is the number of students.">2</span>
+<i class="f" style="display:none" data-hl="cs:9" data-v="s-i:0" data-say="i = 0: 0 &lt; 2 is true, so the loop body runs."></i>
+<i class="f" style="display:none" data-hl="cs:10" data-v="cp-src:a[0]" data-say="saveStudent(f, a[0]): st is a COPY of a[0]. Both character arrays are copied too, but st is only read."></i>
+<span class="f" data-hl="cs:2" data-v="cp-id:1" data-say="f &lt;&lt; st.id writes 1 and a newline.">1</span>
+<span class="f" data-hl="cs:3" data-v="cp-name:Linh Tran" data-say="f &lt;&lt; st.name writes the whole name, spaces included, then a newline.">Linh Tran</span>
+<span class="f" data-hl="cs:4" data-v="cp-age:19" data-say="f &lt;&lt; st.age writes 19.">19</span>
+<span class="f" data-hl="cs:5" data-v="cp-addr:Da Nang" data-say="f &lt;&lt; st.address writes Da Nang. The first student now takes four lines.">Da Nang</span>
+<i class="f" style="display:none" data-hl="cs:9" data-v="s-i:1" data-say="i++ makes i = 1. Check: 1 &lt; 2 is true, loop again."></i>
+<i class="f" style="display:none" data-hl="cs:10" data-v="cp-src:a[1]" data-say="saveStudent(f, a[1]) makes a second copy, this time of a[1]."></i>
+<span class="f" data-hl="cs:2" data-v="cp-id:2" data-say="Writes the second id: 2.">2</span>
+<span class="f" data-hl="cs:3" data-v="cp-name:Minh Le" data-say="Writes the second name.">Minh Le</span>
+<span class="f" data-hl="cs:4" data-v="cp-age:20" data-say="Writes the second age.">20</span>
+<span class="f" data-hl="cs:5" data-v="cp-addr:Hue" data-say="Writes the second address. The file now holds 9 lines.">Hue</span>
+<i class="f" style="display:none" data-hl="cs:9" data-v="s-i:2" data-say="i++ makes i = 2. Check: 2 &lt; 2 is false, so the loop ends."></i>
+      </div>
+    </div>
+    <div>
+      <div class="vars in">
+        <div class="var"><span class="vn">copy of</span><span class="vb" style="min-width:90px"><span id="cp-src" data-v0="–">–</span></span></div>
+        <div class="var"><span class="vn">i</span><span class="vb"><span id="s-i" data-v0="–">–</span></span></div>
+      </div>
+      <div class="card in"><h3>Copy st inside saveStudent</h3>
+        <p style="font-family:var(--mono);font-size:17px">st.id = <span id="cp-id" data-v0="–">–</span></p>
+        <p style="font-family:var(--mono);font-size:17px">st.name = <span id="cp-name" data-v0="–">–</span></p>
+        <p style="font-family:var(--mono);font-size:17px">st.age = <span id="cp-age" data-v0="–">–</span></p>
+        <p style="font-family:var(--mono);font-size:17px">st.address = <span id="cp-addr" data-v0="–">–</span></p>
+      </div>
+      <div class="note blue in" style="font-size:16px">Every field has its own line, so the reader must read them back in the same order: n, then id, name, age, address for each student. Names are read with getline for that reason.</div>
+      <div class="say">Press → to step through.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CLOSE ===== -->
+<section class="slide" id="ket-thuc">
+  <div class="hdr in"><span class="qn">STEP 6</span><h2>Close the file &amp; finish</h2></div>
+  <div class="cols">
+    <div class="in">
+      <div class="code-title">main.cpp (end of else branch)</div>
+<script type="text/x-cpp" id="ck">
+f.close();
+return 0;
+</script>
+      <div class="vars" style="margin-top:14px"><div class="var"><span class="vn">f</span><span class="vb" style="min-width:150px;font-size:16px"><span id="k-f" data-v0="open">open</span></span></div></div>
+      <div class="say">Press → to step through.</div>
+      <i class="f" style="display:none" data-hl="ck:1" data-v="k-f:closed" data-say="f.close() flushes the remaining data and releases the file."></i>
+      <i class="f" style="display:none" data-hl="ck:2" data-say="return 0 tells the system the program finished successfully."></i>
+    </div>
+    <div class="in">
+      <div class="card good"><h3>Normal run</h3><p>Read n students, write n and each student's four fields, close the file.</p></div>
+      <div class="card bad"><h3>File cannot be created</h3><p>is_open() is false: the if branch prints <code class="i">Can not create file</code>. Nothing is written.</p></div>
+      <div class="card bad"><h3>Input longer than 100 characters</h3><p>getline stops at 100 characters and sets the fail state. The rest stays in the buffer, and later reads go wrong.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== NOTES ===== -->
+<section class="slide" id="luu-y">
+  <div class="hdr in"><span class="qn">SUMMARY</span><h2>Notes &amp; summary</h2></div>
+  <div class="cols4 in">
+    <div class="card bad"><h3>Mixing cin &gt;&gt; and getline</h3><p>cin &gt;&gt; leaves a newline behind. A getline right after reads it as an empty line.</p></div>
+    <div class="card bad"><h3>Fixed array size</h3><p>n is not checked against 100. More than 100 students writes past the array.</p></div>
+    <div class="card bad"><h3>Input length</h3><p>Name and address are limited to 100 characters. Longer input breaks later reads.</p></div>
+    <div class="card bad"><h3>Copying large structs</h3><p>Passing Student by value copies 202 characters for every call. const Student &amp;st avoids the copy.</p></div>
+  </div>
+  <div class="cols4 in" style="margin-top:18px">
+    <div class="card good"><h3>Reference</h3><p>Student &amp;st lets inputStudent fill the array element.</p></div>
+    <div class="card good"><h3>getline</h3><p>Reads a whole line, so names with spaces work.</p></div>
+    <div class="card good"><h3>One field per line</h3><p>The file is easy to read back in the same order.</p></div>
+    <div class="card good"><h3>Same file, many calls</h3><p>Pass ofstream by reference so every write goes to one file.</p></div>
+  </div>
+</section>
+
+</div></div>
+
+<div id="bar"></div>
+<div id="hint">← → / Space: step · Shift+→: next slide · Home: first · F: fullscreen · A: show all</div>
+<div id="nav"><button id="prev" aria-label="Previous">‹</button><span id="count">1/1</span><button id="next" aria-label="Next">›</button></div>
+
+<script>
+(function(){
+  const KW=new Set("if else for while do return break continue switch case default struct class using namespace const static new delete true false sizeof public private include pragma auto".split(" "));
+  const TY=new Set("int double float char void bool long short unsigned string Fraction ifstream ofstream".split(" "));
+  const LIB=new Set("cout cin endl std".split(" "));
+  const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  function hlLine(line){
+    if(/^\s*#/.test(line)) return '<span class="p">'+esc(line)+'</span>';
+    const re=/(\/\/.*$)|("(?:\\.|[^"\\])*")|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]\w*)\b(\s*\()?/g;
+    let out="",last=0,m;
+    while((m=re.exec(line))){
+      out+=esc(line.slice(last,m.index));
+      if(m[1]) out+='<span class="c">'+esc(m[1])+'</span>';
+      else if(m[2]) out+='<span class="s">'+esc(m[2])+'</span>';
+      else if(m[3]) out+='<span class="n">'+m[3]+'</span>';
+      else if(m[4]){
+        const w=m[4];
+        const cls=KW.has(w)?"k":TY.has(w)?"t":(LIB.has(w)||m[5])?"fn":"";
+        out+=(cls?'<span class="'+cls+'">'+w+'</span>':w)+(m[5]?esc(m[5]):"");
+      }
+      last=re.lastIndex;
+    }
+    return out+esc(line.slice(last));
+  }
+  document.querySelectorAll('script[type="text/x-cpp"]').forEach(sc=>{
+    const lines=sc.textContent.replace(/^\n/,"").replace(/\s+$/,"").split("\n");
+    const div=document.createElement("div");
+    div.className="code "+(sc.className||"");
+    if(sc.id) div.id=sc.id;
+    div.innerHTML=lines.map((l,i)=>'<div class="ln"><span class="no">'+(i+1)+'</span><span>'+(hlLine(l)||" ")+'</span></div>').join("");
+    sc.replaceWith(div);
+  });
+
+  // Hộp struct (num / denom)
+  document.querySelectorAll(".sx").forEach(e=>{
+    const d=e.dataset,id=d.id;
+    e.className+=" struct";
+    e.innerHTML=`<div class="sname">${d.title}</div>`+
+      `<div class="fld"><span class="vn">${d.name}.num</span><span class="vb"><span id="${id}n" data-v0="${d.n}">${d.n}</span></span></div>`+
+      `<div class="fld"><span class="vn">${d.name}.denom</span><span class="vb"><span id="${id}d" data-v0="${d.d}">${d.d}</span></span></div>`;
+  });
+
+  const deck=document.getElementById("deck");
+  const slides=[...document.querySelectorAll(".slide")];
+  let cur=0,step=0;
+  const frags=i=>[...slides[i].querySelectorAll(".f")];
+  function fit(){deck.style.transform=`scale(${Math.min(innerWidth/1280,innerHeight/720)*0.97})`}
+  addEventListener("resize",fit);fit();
+  function parse(f,key,m){(f.dataset[key]||"").split(";").filter(Boolean).forEach(p=>{const j=p.indexOf(":");m[p.slice(0,j)]=p.slice(j+1)})}
+  function applyState(){
+    const s=slides[cur],hl={},vv={};
+    frags(cur).slice(0,step).forEach(f=>{parse(f,"hl",hl);parse(f,"v",vv)});
+    s.querySelectorAll(".code").forEach(c=>{
+      const want=new Set();
+      (hl[c.id]||"").split(",").filter(Boolean).forEach(r=>{const [a,b]=r.split("-").map(Number);for(let i=a;i<=(b||a);i++)want.add(i)});
+      [...c.querySelectorAll(".ln")].forEach((l,i)=>l.classList.toggle("cur",want.has(i+1)));
+    });
+    s.querySelectorAll("[data-v0]").forEach(e=>{
+      const nv=vv[e.id]??e.dataset.v0;
+      if(e.textContent!==nv){e.textContent=nv;e.classList.remove("pop");void e.offsetWidth;e.classList.add("pop")}
+    });
+  }
+  function render(){
+    slides.forEach((s,i)=>{
+      s.classList.toggle("active",i===cur);
+      s.classList.toggle("past",i<cur);
+      frags(i).forEach((f,k)=>f.classList.toggle("on",i===cur&&k<step));
+    });
+    let say=null;
+    frags(cur).slice(0,step).forEach(f=>{if(f.dataset.say)say=f.dataset.say});
+    const sy=slides[cur].querySelector(".say");
+    if(sy) sy.textContent=say||"Press → to step through.";
+    document.getElementById("count").textContent=(cur+1)+"/"+slides.length;
+    document.getElementById("bar").style.width=((cur+1)/slides.length*100)+"%";
+    applyState();
+    history.replaceState(null,"","#"+slides[cur].id);
+  }
+  function next(){const n=frags(cur).length;if(step<n)step++;else if(cur<slides.length-1){cur++;step=0}render()}
+  function prev(){if(step>0)step--;else if(cur>0){cur--;step=frags(cur).length}render()}
+  function go(i,s=0){cur=Math.max(0,Math.min(slides.length-1,i));step=s;render()}
+  addEventListener("keydown",e=>{
+    if(["ArrowRight","PageDown"," ","Enter"].includes(e.key)){e.preventDefault();e.shiftKey?go(cur+1):next()}
+    else if(["ArrowLeft","PageUp","Backspace"].includes(e.key)){e.preventDefault();e.shiftKey?go(cur-1):prev()}
+    else if(e.key==="Home")go(0);
+    else if(e.key==="End")go(slides.length-1);
+    else if(e.key==="f"||e.key==="F"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()}
+    else if(e.key==="a"||e.key==="A"){step=frags(cur).length;render()}
+  });
+  document.getElementById("next").onclick=next;
+  document.getElementById("prev").onclick=prev;
+  document.querySelectorAll("[data-goto]").forEach(el=>el.onclick=()=>go(slides.findIndex(s=>s.id===el.dataset.goto)));
+  let tx=null;
+  addEventListener("touchstart",e=>tx=e.touches[0].clientX,{passive:true});
+  addEventListener("touchend",e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)dx<0?next():prev();tx=null});
+  const idx=slides.findIndex(s=>s.id===location.hash.slice(1));
+  go(idx>=0?idx:0);
+  addEventListener("hashchange",()=>{const j=slides.findIndex(s=>s.id===location.hash.slice(1));if(j>=0&&j!==cur)go(j)});
+})();
+</script>
+</body>
+</html>

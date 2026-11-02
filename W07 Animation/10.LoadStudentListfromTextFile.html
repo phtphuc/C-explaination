@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reading and printing an array of students</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--text:#1e1b3a;--muted:#64607d;--line:#ece8f7;--t:#7c3aed;--k:#d6336c;--s:#059669;--n:#ea580c;--c:#9ca3b8;--p:#db2777;--fn:#0284c7;--mono:"JetBrains Mono",Consolas,Menlo,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:linear-gradient(135deg,#f3eeff,#e8f8ff 50%,#fff1f7);color:var(--text);font-family:"Be Vietnam Pro",system-ui,sans-serif}
+#deck{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center}
+.slide{position:absolute;inset:0;padding:34px 52px 36px 56px;border-radius:16px;background:#fff;box-shadow:0 18px 50px rgba(124,58,237,.14);overflow:hidden;opacity:0;pointer-events:none;transform:translateX(60px);transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1)}
+.slide::before{content:"";position:absolute;left:0;top:0;width:8px;height:100%;background:linear-gradient(180deg,#7c3aed,#ec4899)}
+.slide.past{transform:translateX(-60px)}
+.slide.active{opacity:1;transform:none;pointer-events:auto}
+h1{font-size:60px;line-height:1.1;font-weight:800}
+h2{font-size:34px;line-height:1.2;font-weight:800;margin-bottom:18px}
+h3{font-size:19px;color:#7c3aed;margin-bottom:4px}
+p{font-size:19px;line-height:1.45}
+.muted{color:var(--muted)}
+.grad{background:linear-gradient(90deg,#7c3aed,#ec4899 55%,#f97316);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kicker{font-family:var(--mono);color:#db2777;font-size:20px;margin-bottom:18px;font-weight:600}
+code{font-family:var(--mono);font-size:.9em;background:#fdf0f7;border:1px solid #f9d3e6;padding:0 5px;border-radius:6px;color:#be185d}
+.cols{display:grid;grid-template-columns:1.1fr 1fr;gap:26px;align-items:start}
+.code{font-family:var(--mono);font-size:16.5px;line-height:1.5;background:#fcfbff;border:1px solid var(--line);border-radius:12px;padding:10px 0;margin-bottom:10px}
+.code .ln{display:flex;padding:0 14px 0 8px;white-space:pre;transition:background .4s,box-shadow .4s}
+.code .no{color:#c9c3e0;width:26px;flex:none;text-align:right;margin-right:12px;user-select:none}
+.code .ln.cur{background:rgba(245,158,11,.2);box-shadow:inset 5px 0 #f59e0b}
+.k{color:var(--k);font-weight:600}.t{color:var(--t);font-weight:600}.s{color:var(--s)}.n{color:var(--n)}.c{color:var(--c);font-style:italic}.p{color:var(--p)}.fn{color:var(--fn)}
+.f{opacity:0;transform:translateY(12px);transition:opacity .45s ease,transform .45s ease}
+.f.on{opacity:1;transform:none}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:10px;box-shadow:0 8px 24px -12px rgba(124,58,237,.25)}
+.card p{font-size:18px}
+.bad{border-left:6px solid #e11d48}
+.file{font-family:var(--mono);font-size:18px;line-height:1.5;background:#fff;border:2px dashed #c4b5fd;border-radius:12px;padding:8px 14px;white-space:pre;margin-bottom:10px}
+.row{font-family:var(--mono);font-size:17px;padding:3px 12px;border-radius:8px;border:2px solid transparent;margin:3px 0;background:#faf8ff;color:var(--muted);transition:all .4s}
+.row.cur{border-color:#7c3aed;background:#f5f0ff;color:var(--text);font-weight:700}
+.row.read{background:#fff7e0;color:#b45309}
+.row small{font-family:"Be Vietnam Pro";font-size:14px;color:var(--muted);font-weight:400}
+.var{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.vn{font-family:var(--mono);font-size:18px;color:var(--t);font-weight:600;width:110px}
+.vb{display:inline-flex;align-items:center;justify-content:center;min-width:120px;height:46px;padding:0 12px;border-radius:10px;border:2px solid #c4b5fd;background:#fff;font-family:var(--mono);font-size:19px;font-weight:700}
+.pop{animation:pop .45s}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.25)}100%{transform:none;opacity:1}}
+.console{font-family:var(--mono);font-size:18px;line-height:1.55;background:linear-gradient(135deg,#1e1b3a,#2a1f4d);border-radius:12px;padding:12px 18px;color:#e6f0ff;white-space:pre;min-height:150px}
+.say{position:absolute;left:56px;right:52px;bottom:30px;padding:10px 16px;border-radius:12px;background:linear-gradient(135deg,#1e1b3a,#2a1f4d);color:#fff;font-size:19px;line-height:1.4;min-height:58px}
+.say::before{content:"▶ ";color:#fbbf24}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#bar{position:fixed;left:0;bottom:0;height:5px;background:linear-gradient(90deg,#7c3aed,#ec4899,#f97316);transition:width .4s;z-index:5}
+#nav{position:fixed;right:14px;bottom:12px;display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:14px;color:var(--muted);z-index:5}
+#nav button{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:8px;width:36px;height:32px;cursor:pointer;font-size:16px}
+#hint{position:fixed;left:14px;bottom:12px;font-size:13px;color:#8a91b4;z-index:5}
+@media print{#nav,#bar,#hint{display:none}}
+</style>
+</head>
+<body>
+<div id="deck">
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide" id="s1">
+  <div class="kicker">// C++ · struct · char arrays · getline · ifstream</div>
+  <h1>Reading a list of students<br><span class="grad">with text fields</span></h1>
+  <p class="muted" style="margin-top:22px;max-width:860px">Each student has an ID, a name, an age and an address. The names and addresses contain spaces, so they are read with <code>getline</code>. That needs care, and it is where most bugs in this program come from.</p>
+  <div class="say">Press → or Space to step through. Press A to reveal everything.</div>
+</section>
+
+<!-- ============ 2. STRUCT & FILE ============ -->
+<section class="slide" id="s2">
+  <h2>The struct and the file format</h2>
+  <div class="cols">
+    <script type="text/x-cpp" id="c2">
+struct Student{
+    int id;
+    char name[101];
+    int age;
+    char address[101];
+};
+    </script>
+    <div>
+      <div class="card f" data-hl="c2:2-5" data-say="Each Student holds an id and an age (ints), plus two char arrays of 101 bytes: 100 characters and the end-of-string marker."><h3>One Student</h3><p><code>id</code> and <code>age</code> are ints. <code>name</code> and <code>address</code> are text.</p></div>
+      <div class="card f" data-say="The file lists the count first, then each student on its own lines: id, name, age, address."><p><b>studentarray-input.txt</b> (assumed contents):</p><div class="file">2
+1
+Nguyen Van An
+20
+Ho Chi Minh City
+2
+Tran Thi Binh
+19
+Da Nang</div></div>
+    </div>
+  </div>
+  <div class="say">Press → to step through.</div>
+</section>
+
+<!-- ============ 3. MAIN ============ -->
+<section class="slide" id="s3">
+  <h2>main(): open the file and check it</h2>
+  <div class="cols">
+    <script type="text/x-cpp" id="c3">
+int main(int argc, const char * argv[]) {
+    Student a[100];
+    int n = 0;
+    ifstream f;
+
+    f.open("D:\\studentarray-input.txt");
+
+    if(!f.is_open()){
+        cout << "Can not open file" << endl;
+    }
+    else{
+        loadStudentArray(f, a, n);
+        printStudentArray(a, n);
+        f.close();
+    }
+    return 0;
+}
+    </script>
+    <div>
+      <div class="card f" data-hl="c3:2-3" data-say="a has room for 100 students. n starts at 0 and will be set from the file."><h3>Declare</h3><p><code>a[100]</code> and <code>n = 0</code>.</p></div>
+      <div class="card f" data-hl="c3:6" data-say="open() attaches f to the file. The double backslash is one real backslash in the path."><h3>Open</h3><p>One stream, one file.</p></div>
+      <div class="card f" data-hl="c3:8-9" data-say="If the file could not be opened, only the error message is printed."><h3>Check</h3><p>Nothing else runs when the file is missing.</p></div>
+      <div class="card f" data-hl="c3:12-13" data-say="Otherwise loadStudentArray fills the array and sets n, then printStudentArray prints it."><h3>Load and print</h3><p>The count <code>n</code> decides how many students are loaded and printed.</p></div>
+    </div>
+  </div>
+  <div class="say">Press → to step through.</div>
+</section>
+
+<!-- ============ 4. loadStudent (getline trap) ============ -->
+<section class="slide" id="s4">
+  <h2>loadStudent: why there are two getline calls</h2>
+  <div class="cols">
+    <script type="text/x-cpp" id="c4">
+void loadStudent(ifstream &amp;f, Student &amp;st){
+    f >> st.id;
+    f.getline(st.name, 101);
+    f.getline(st.name, 101);
+    f >> st.age;
+    f.getline(st.address, 101);
+    f.getline(st.address, 101);
+}
+    </script>
+    <div>
+      <p class="muted" style="font-size:15px;margin-bottom:4px">The file, line by line. Each row is one line of the file:</p>
+      <div class="row read" id="r0">2 <small>(read by n)</small></div>
+      <div class="row" id="r1">1 <small>(id)</small></div>
+      <div class="row" id="r2">⏎ <small>(rest of the id line: empty)</small></div>
+      <div class="row" id="r3">Nguyen Van An <small>(name)</small></div>
+      <div class="row" id="r4">20 <small>(age)</small></div>
+      <div class="row" id="r5">⏎ <small>(rest of the age line: empty)</small></div>
+      <div class="row" id="r6">Ho Chi Minh City <small>(address)</small></div>
+      <div style="margin-top:8px">
+        <div class="var"><span class="vn">st.id</span><span class="vb"><span id="vid" data-v0="?">?</span></span></div>
+        <div class="var"><span class="vn">st.name</span><span class="vb"><span id="vnm" data-v0="?">?</span></span></div>
+        <div class="var"><span class="vn">st.age</span><span class="vb"><span id="vage" data-v0="?">?</span></span></div>
+        <div class="var"><span class="vn">st.address</span><span class="vb"><span id="vad" data-v0="?">?</span></span></div>
+      </div>
+    </div>
+  </div>
+  <i class="f" data-hl="c4:2" data-v="vid:1" data-c="r1:cur" data-say="f >> st.id reads 1. It stops right after the 1, so the newline at the end of that line is still unread."></i>
+  <i class="f" data-hl="c4:3" data-v="vnm:(empty)" data-c="r1:read;r2:cur" data-say="The first getline reads the leftover newline, which is an empty line. st.name is now empty. That is why a second getline is needed."></i>
+  <i class="f" data-hl="c4:4" data-v="vnm:Nguyen Van An" data-c="r2:read;r3:cur" data-say="The second getline reads the whole line Nguyen Van An into st.name. Spaces are kept, unlike with &gt;&gt;."></i>
+  <i class="f" data-hl="c4:5" data-v="vage:20" data-c="r3:read;r4:cur" data-say="f >> st.age reads 20 and stops before the newline after it."></i>
+  <i class="f" data-hl="c4:6" data-c="r4:read;r5:cur" data-say="Again the first getline eats the leftover newline, so st.address is empty for now."></i>
+  <i class="f" data-hl="c4:7" data-v="vad:Ho Chi Minh City" data-c="r5:read;r6:cur" data-say="The second getline reads Ho Chi Minh City into st.address. One student is loaded; the file pointer sits at the next student's id."></i>
+  <div class="say">Press → to step through.</div>
+</section>
+
+<!-- ============ 5. PRINT ============ -->
+<section class="slide" id="s5">
+  <h2>printStudentArray: print the count, then each student</h2>
+  <div class="cols">
+    <script type="text/x-cpp" id="c5">
+void printStudentArray(Student a[], int n){
+    cout << "Number of elements: " << n << endl;
+    for(int i = 0; i < n; i++){
+        cout << "a[" << i << "]: " << endl;
+        printStudent(a[i]);
+    }
+}
+    </script>
+    <div>
+      <p class="muted" style="font-size:16px;margin-bottom:6px">Console output:</p>
+      <div class="console"><span class="f" data-hl="c5:2" data-say="The count prints first: n is 2.">Number of elements: 2
+</span><span class="f" data-hl="c5:4" data-say="i = 0: the label a[0]: is printed.">a[0]: 
+</span><span class="f" data-hl="c5:5" data-say="printStudent(a[0]) prints the four fields of the first student.">ID: 1
+Name: Nguyen Van An
+Age: 20
+Address: Ho Chi Minh City
+</span><span class="f" data-hl="c5:4" data-say="i = 1: the label a[1]: is printed.">a[1]: 
+</span><span class="f" data-hl="c5:5" data-say="printStudent(a[1]) prints the second student. Then i = 2 and the loop stops.">ID: 2
+Name: Tran Thi Binh
+Age: 19
+Address: Da Nang</span></div>
+    </div>
+  </div>
+  <div class="say">Press → to step through.</div>
+</section>
+
+<!-- ============ 6. COMMON MISTAKES ============ -->
+<section class="slide" id="s6">
+  <h2>Common mistakes newbies make</h2>
+  <div class="grid2">
+    <div class="card bad"><h3>1. Using one getline for the name</h3><p>The first getline only reads the leftover newline, so the name stays empty and every later field shifts. Keep both calls, or call <code>f.ignore()</code> after <code>&gt;&gt;</code> instead.</p></div>
+    <div class="card bad"><h3>2. Reading the name with &gt;&gt;</h3><p><code>f &gt;&gt; st.name</code> stops at the first space, so <code>Nguyen Van An</code> becomes <code>Nguyen</code>. Use <code>getline</code> for text with spaces.</p></div>
+    <div class="card bad"><h3>3. Deleting a getline</h3><p>Removing either getline in a pair shifts every field after it by one line. The name ends up in the age and the address in the next student's id.</p></div>
+    <div class="card bad"><h3>4. Uncommenting the strip line on the wrong file</h3><p><code>st.name[strlen(st.name) - 1] = '\0';</code> removes the last character. It is only needed if the file has Windows line endings (a stray <code>\r</code>). On a clean file it deletes a real letter. Also add <code>#include &lt;cstring&gt;</code> before using <code>strlen</code>.</p></div>
+    <div class="card bad"><h3>5. Text longer than 100 characters</h3><p>getline stops at 100 characters, and the rest of the line is read as the next field. Everything after it is then out of sync. Keep each name and address under 100 characters.</p></div>
+    <div class="card bad"><h3>6. Fields in a different order</h3><p>If the file lists age before name, the program still reads it without error, but each value goes into the wrong field. The file layout must match the order in <code>loadStudent</code>.</p></div>
+  </div>
+  <div class="say">Tip: if a field looks wrong, print each field right after loading it to find which read went out of step.</div>
+</section>
+
+</div>
+
+<div id="bar"></div>
+<div id="hint">← → / Space: step · Shift+→: next slide · Home/End · F: fullscreen</div>
+<div id="nav"><button id="prev" aria-label="Previous">‹</button><span id="count">1/1</span><button id="next" aria-label="Next">›</button></div>
+
+<script>
+(function(){
+  // ---------- C++ highlighter ----------
+  const KW=new Set("if else for while do return break continue switch case default struct class using namespace const static new delete true false sizeof public private include pragma auto".split(" "));
+  const TY=new Set("int double float char void bool long short unsigned string ifstream ofstream Student".split(" "));
+  const LIB=new Set("cout cin endl std getline strlen".split(" "));
+  const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  function hlLine(line){
+    if(/^\s*#/.test(line)) return '<span class="p">'+esc(line)+'</span>';
+    const re=/(\/\/.*$)|("(?:\\.|[^"\\])*")|\b(\d+)\b|\b([A-Za-z_]\w*)\b(\s*\()?/g;
+    let out="",last=0,m;
+    while((m=re.exec(line))){
+      out+=esc(line.slice(last,m.index));
+      if(m[1]) out+='<span class="c">'+esc(m[1])+'</span>';
+      else if(m[2]) out+='<span class="s">'+esc(m[2])+'</span>';
+      else if(m[3]) out+='<span class="n">'+m[3]+'</span>';
+      else{
+        const w=m[4];
+        const cls=KW.has(w)?"k":TY.has(w)?"t":LIB.has(w)?"fn":(m[5]?"fn":"");
+        out+=(cls?'<span class="'+cls+'">'+w+'</span>':w)+(m[5]?esc(m[5]):"");
+      }
+      last=re.lastIndex;
+    }
+    return out+esc(line.slice(last));
+  }
+  document.querySelectorAll('script[type="text/x-cpp"]').forEach(sc=>{
+    const lines=sc.textContent.replace(/^\n/,"").replace(/\s+$/,"").split("\n");
+    const div=document.createElement("div");
+    div.className="code";
+    div.id=sc.id;
+    div.innerHTML=lines.map((l,i)=>'<div class="ln"><span class="no">'+(i+1)+'</span><span>'+(hlLine(l)||" ")+'</span></div>').join("");
+    sc.replaceWith(div);
+  });
+
+  // ---------- deck engine ----------
+  const deck=document.getElementById("deck");
+  const slides=[...document.querySelectorAll(".slide")];
+  let cur=0,step=0;
+  const frags=i=>[...slides[i].querySelectorAll(".f")];
+  function fit(){const s=Math.min(innerWidth/1280,innerHeight/720)*0.96;deck.style.transform="translate(-50%,-50%) scale("+s+")"}
+  addEventListener("resize",fit);fit();
+  function parse(f,key,m){(f.dataset[key]||"").split(";").filter(Boolean).forEach(p=>{const j=p.indexOf(":");m[p.slice(0,j)]=p.slice(j+1)})}
+  function applyState(){
+    const s=slides[cur],hl={},vv={},cc={};
+    frags(cur).slice(0,step).forEach(f=>{parse(f,"hl",hl);parse(f,"v",vv);parse(f,"c",cc)});
+    s.querySelectorAll(".code").forEach(c=>{
+      const want=new Set();
+      (hl[c.id]||"").split(",").filter(Boolean).forEach(r=>{const [a,b]=r.split("-").map(Number);for(let i=a;i<=(b||a);i++)want.add(i)});
+      c.querySelectorAll(".ln").forEach((l,i)=>l.classList.toggle("cur",want.has(i+1)));
+    });
+    s.querySelectorAll("[data-v0]").forEach(e=>{
+      const nv=vv[e.id]??e.dataset.v0;
+      if(e.textContent!==nv){e.textContent=nv;e.classList.remove("pop");void e.offsetWidth;e.classList.add("pop")}
+    });
+    s.querySelectorAll(".row").forEach(e=>{e.className="row"+(cc[e.id]?" "+cc[e.id]:"")});
+  }
+  function render(){
+    slides.forEach((s,i)=>{
+      s.classList.toggle("active",i===cur);
+      s.classList.toggle("past",i<cur);
+      frags(i).forEach((f,k)=>f.classList.toggle("on",i===cur&&k<step));
+    });
+    const say=frags(cur).slice(0,step).reduce((a,f)=>f.dataset.say||a,null);
+    const sy=slides[cur].querySelector(".say");
+    if(sy) sy.textContent=say||"Press → to step through.";
+    document.getElementById("count").textContent=(cur+1)+"/"+slides.length;
+    document.getElementById("bar").style.width=((cur+1)/slides.length*100)+"%";
+    applyState();
+    try{history.replaceState(null,"","#"+slides[cur].id)}catch(e){}
+  }
+  function next(){if(step<frags(cur).length)step++;else if(cur<slides.length-1){cur++;step=0}render()}
+  function prev(){if(step>0)step--;else if(cur>0){cur--;step=frags(cur).length}render()}
+  function go(i,s=0){cur=Math.max(0,Math.min(slides.length-1,i));step=s;render()}
+  addEventListener("keydown",e=>{
+    if(["ArrowRight","PageDown"," ","Enter"].includes(e.key)){e.preventDefault();e.shiftKey?go(cur+1):next()}
+    else if(["ArrowLeft","PageUp","Backspace"].includes(e.key)){e.preventDefault();e.shiftKey?go(cur-1):prev()}
+    else if(e.key==="Home")go(0);
+    else if(e.key==="End")go(slides.length-1);
+    else if(e.key==="f"||e.key==="F"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()}
+    else if(e.key==="a"||e.key==="A"){step=frags(cur).length;render()}
+  });
+  document.getElementById("next").onclick=next;
+  document.getElementById("prev").onclick=prev;
+  let tx=null;
+  addEventListener("touchstart",e=>tx=e.touches[0].clientX,{passive:true});
+  addEventListener("touchend",e=>{if(tx==null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50)dx<0?next():prev();tx=null});
+  const h=location.hash.slice(1);
+  const idx=slides.findIndex(s=>s.id===h);
+  go(idx>=0?idx:0);
+  addEventListener("hashchange",()=>{const j=slides.findIndex(s=>s.id===location.hash.slice(1));if(j>=0&&j!==cur)go(j)});
+})();
+</script>
+</body>
+</html>
